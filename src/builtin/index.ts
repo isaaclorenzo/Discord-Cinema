@@ -1,6 +1,7 @@
 // Contenido incluido de serie: skills, plugins y suites de evaluación.
-import type { EvalSuite, Plugin, Skill } from '../core/extensions/types'
+import type { EvalSuite } from '../core/extensions/types'
 
-export const BUILTIN_SKILLS: Skill[] = []
-export const BUILTIN_PLUGINS: Plugin[] = []
+export { BUILTIN_SKILLS } from './skills'
+export { BUILTIN_PLUGINS } from './plugins'
+
 export const BUILTIN_EVALS: EvalSuite[] = []

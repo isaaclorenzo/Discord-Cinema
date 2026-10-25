@@ -18,9 +18,28 @@ export function parseFrontmatter(text: string): Frontmatter {
     const parsed = parseYaml(m[1])
     if (parsed && typeof parsed === 'object') data = parsed as Record<string, unknown>
   } catch {
-    data = {}
+    data = looseFrontmatter(m[1])
   }
   return { data, body: m[2] }
+}
+
+/**
+ * Frontmatter "clave: valor" línea a línea. Muchos SKILL.md reales tienen
+ * descripciones con ": " sin comillas, que no son YAML válido.
+ */
+function looseFrontmatter(text: string): Record<string, unknown> {
+  const out: Record<string, unknown> = {}
+  let last: string | null = null
+  for (const line of text.split(/\r?\n/)) {
+    const kv = line.match(/^([A-Za-z][\w-]*):\s*(.*)$/)
+    if (kv) {
+      last = kv[1]
+      out[last] = kv[2].replace(/^(["'])(.*)\1$/, '$2')
+    } else if (last && /^\s+\S/.test(line)) {
+      out[last] = `${out[last]} ${line.trim()}`.trim()
+    }
+  }
+  return out
 }
 
 function toList(v: unknown): string[] | undefined {
