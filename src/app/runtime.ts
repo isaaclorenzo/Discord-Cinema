@@ -15,7 +15,7 @@ import type { ModelInfo, ProviderConfig } from '../core/providers/types'
 import { python } from '../core/sandbox/python'
 import { buildPreviewHtml } from '../core/sandbox/preview'
 import type { Workspace } from '../core/sandbox/workspace'
-import { buildToolset } from '../core/tools/registry'
+import { buildToolset, compactToolset } from '../core/tools/registry'
 import type { AgentServices, AnyTool, BackgroundShell } from '../core/tools/types'
 import type { ChatMessage, ImagePart, PermissionMode, ToolDisplay } from '../core/types'
 import { truncate, uid } from '../core/util'
@@ -239,7 +239,8 @@ export function makeServices(t: RunTarget, opts: { interactive: boolean; signal:
   return services
 }
 
-async function toolsFor(def?: AgentDef, depth = 0): Promise<AnyTool[]> {
+async function toolsFor(def?: AgentDef, depth = 0, model?: ModelInfo): Promise<AnyTool[]> {
+  if (model?.compactTools) return compactToolset(await toolsFor(def, depth))
   const st = useSettings.getState()
   let extra: AnyTool[] = enabledPluginTools().map(pluginToolToDef)
   const servers = enabledMcpServers()
@@ -281,7 +282,7 @@ async function runSubagent(
 ): Promise<string> {
   const st = useSettings.getState()
   const target = (def.model && def.model !== 'inherit' && resolveModel(def.model)) || { provider: t.provider, model: t.model }
-  const tools = await toolsFor(def, parent.depth + 1)
+  const tools = await toolsFor(def, parent.depth + 1, target.model)
   const messages: ChatMessage[] = [{ id: uid('m'), role: 'user', content: prompt, createdAt: Date.now() }]
   let lastPush = 0
   const emit = (force = false) => {
@@ -354,7 +355,7 @@ export async function runSession(sessionId: string, opts: RunOptions = {}): Prom
   }
   const { provider, model } = resolved
   const apiKey = useSecrets.getState().getKey(provider.id)
-  if (provider.kind !== 'mock' && !apiKey && !/localhost|127\.0\.0\.1/.test(provider.baseUrl)) {
+  if (provider.kind !== 'mock' && provider.kind !== 'webllm' && !apiKey && !/localhost|127\.0\.0\.1/.test(provider.baseUrl)) {
     useUi.getState().toast(`Falta la clave de API de ${provider.name}. Añádela en Proveedores.`, 'error')
     useUi.getState().setView('providers')
     return null
@@ -367,7 +368,7 @@ export async function runSession(sessionId: string, opts: RunOptions = {}): Prom
   await mountPluginFiles(ws)
   const target: RunTarget = { sessionId, ws, provider, model }
   try {
-    const tools = await toolsFor(undefined, 0)
+    const tools = await toolsFor(undefined, 0, model)
     const memory = await readMemory(ws)
     const st = useSettings.getState()
     const stats = await runAgent({

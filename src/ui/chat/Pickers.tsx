@@ -56,7 +56,7 @@ export function ModelPicker({ value, onChange, up = true }: { value: string; onC
               <div key={p.id} className="mb-1">
                 <div className="flex items-center justify-between px-2.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
                   {p.name}
-                  {p.kind !== 'mock' && !keys[p.id] && !/localhost|127\.0\.0\.1/.test(p.baseUrl) && <span className="normal-case text-amber/80">sin clave</span>}
+                  {p.kind !== 'mock' && p.kind !== 'webllm' && !keys[p.id] && !/localhost|127\.0\.0\.1/.test(p.baseUrl) && <span className="normal-case text-amber/80">sin clave</span>}
                 </div>
                 {p.models.length === 0 && <div className="px-2.5 py-1 text-xs text-muted">Carga los modelos en Proveedores</div>}
                 {p.models.map((m) => {
@@ -73,7 +73,7 @@ export function ModelPicker({ value, onChange, up = true }: { value: string; onC
                       }}
                     >
                       <span className="min-w-0 flex-1 truncate">{m.label ?? m.id}</span>
-                      {m.toolMode === 'prompt' && <span className="chip">tools por prompt</span>}
+                      {m.sizeMB ? <span className="chip">{(m.sizeMB / 1024).toFixed(1)} GB</span> : m.toolMode === 'prompt' && <span className="chip">tools por prompt</span>}
                       {m.vision && <span className="chip">visión</span>}
                       {ref === value && <Check size={13} className="text-violet-200" />}
                     </button>

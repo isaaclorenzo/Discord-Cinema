@@ -24,6 +24,7 @@
     "@codemirror/view": "^6.43.15",
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource-variable/geist-mono": "^5.3.0",
+    "@mlc-ai/web-llm": "^0.2.86",
     "@modelcontextprotocol/sdk": "^1.32.2",
     "@uiw/react-codemirror": "^4.25.12",
     "diff": "^9.0.0",

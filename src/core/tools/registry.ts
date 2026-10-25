@@ -43,3 +43,15 @@ export function buildToolset(opts: ToolsetOptions): AnyTool[] {
   const seen = new Set<string>()
   return out.filter((t) => (seen.has(t.name) ? false : (seen.add(t.name), true)))
 }
+
+/** Herramientas que reciben los modelos pequeños (locales): las esenciales, con descripciones cortas. */
+export const COMPACT_TOOL_NAMES = ['Read', 'Write', 'Edit', 'LS', 'Glob', 'Grep', 'Bash', 'Python', 'TodoWrite', 'Preview', 'WebFetch', 'WebSearch']
+
+export function compactToolset(tools: AnyTool[]): AnyTool[] {
+  return tools
+    .filter((t) => COMPACT_TOOL_NAMES.includes(t.name))
+    .map((t) => {
+      const first = t.description.split('\n\n')[0].split('\n')[0]
+      return { ...t, description: first.length > 240 ? `${first.slice(0, 237)}...` : first }
+    })
+}

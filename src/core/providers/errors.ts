@@ -10,6 +10,8 @@ export interface ErrorHint {
 export function explainProviderError(message: string): ErrorHint {
   const status = Number(message.match(/respondió (\d{3})/)?.[1] ?? 0)
   const m = message.toLowerCase()
+  if (/webgpu/.test(m)) return { title: 'Modelo local no disponible', hint: 'Este equipo o navegador no puede ejecutar el modelo local. Usa Chrome o Edge actualizados en un ordenador con GPU, o elige un modelo más pequeño (Qwen3 0.6B, Llama 3.2 1B).' }
+  if (/modelo local|espacio en el navegador|descargar el modelo/.test(m)) return { title: 'Problema con el modelo local', hint: 'Revisa el detalle: puede faltar espacio en disco, conexión para la primera descarga o memoria de GPU. Un modelo más pequeño suele funcionar.' }
   if (/cors|failed to fetch|networkerror|load failed/.test(m)) {
     return { title: 'No se pudo conectar', hint: 'El navegador no pudo llegar al proveedor (suele ser CORS). Prueba la conexión «Relay» en Proveedores, o un proveedor que admita llamadas directas como OpenRouter.' }
   }

@@ -7,6 +7,8 @@ import { uid } from '../../core/util'
 import { useSecrets } from '../../state/secrets'
 import { useSettings } from '../../state/settings'
 import { useRelay } from '../../state/relay'
+import { deleteLocalModel, isLocalModelCached, preloadLocalModel, useWebGpu, useWebLlm } from '../../core/providers/webllm'
+import { useEffect } from 'react'
 import { useUi } from '../../state/ui'
 import { cx } from '../cx'
 import { Field, Modal, PageHeader, PageShell, Spinner, Toggle } from '../primitives'
@@ -17,6 +19,67 @@ function hostOf(url: string): string {
   } catch {
     return ''
   }
+}
+
+function GpuNote() {
+  const gpu = useWebGpu((s) => s.available)
+  if (gpu === null) return null
+  return (
+    <p className={cx('mt-3 text-xs', gpu ? 'text-ok' : 'text-amber')}>
+      {gpu
+        ? 'WebGPU disponible en este navegador. Descarga un modelo por adelantado o elígelo en el chat y se descargará solo.'
+        : 'Este navegador o equipo no tiene WebGPU disponible: los modelos locales necesitan Chrome o Edge actualizados en un ordenador con GPU (o Safari 26+).'}
+    </p>
+  )
+}
+
+function LocalModelActions({ id, sizeMB }: { id: string; sizeMB?: number }) {
+  const [cached, setCached] = useState<boolean | null>(null)
+  const loading = useWebLlm((s) => s.loading)
+  const loaded = useWebLlm((s) => s.loaded)
+  const gpu = useWebGpu((s) => s.available)
+  useEffect(() => {
+    let alive = true
+    if (gpu) void isLocalModelCached(id).then((c) => alive && setCached(c))
+    return () => {
+      alive = false
+    }
+  }, [id, loaded, gpu])
+  if (!gpu) return sizeMB ? <span className="chip">{(sizeMB / 1024).toFixed(1)} GB</span> : null
+  return (
+    <>
+      {sizeMB ? <span className="chip">{(sizeMB / 1024).toFixed(1)} GB</span> : null}
+      {cached ? (
+        <button
+          className="btn px-2 py-1 text-xs"
+          title="Borrar el modelo de la caché del navegador"
+          onClick={async () => {
+            await deleteLocalModel(id)
+            setCached(false)
+            useUi.getState().toast('Modelo borrado de la caché', 'success')
+          }}
+        >
+          <Trash2 size={12} /> Borrar
+        </button>
+      ) : (
+        <button
+          className="btn px-2 py-1 text-xs"
+          disabled={loading}
+          onClick={async () => {
+            try {
+              await preloadLocalModel(id)
+              setCached(true)
+              useUi.getState().toast('Modelo listo para usar', 'success')
+            } catch (e) {
+              useUi.getState().toast((e as Error).message, 'error')
+            }
+          }}
+        >
+          <Download size={12} /> Descargar
+        </button>
+      )}
+    </>
+  )
 }
 
 function ModelRow({ provider, model }: { provider: ProviderConfig; model: ModelInfo }) {
@@ -36,6 +99,7 @@ function ModelRow({ provider, model }: { provider: ProviderConfig; model: ModelI
         {model.toolMode === 'prompt' && <span className="chip">tools por prompt</span>}
         {model.toolMode === 'none' && <span className="chip">sin tools</span>}
         {model.vision && <span className="chip">visión</span>}
+        {provider.kind === 'webllm' && <LocalModelActions id={model.id} sizeMB={model.sizeMB} />}
         <button
           className={cx('btn px-2 py-1 text-xs', selected && 'border-violet-300/40 text-violet-100')}
           onClick={() => {
@@ -91,7 +155,7 @@ function ProviderCard({ p }: { p: ProviderConfig }) {
   const [testing, setTesting] = useState(false)
   const [newModel, setNewModel] = useState('')
   const update = (patch: Partial<ProviderConfig>) => useSettings.getState().updateProvider(p.id, patch)
-  const isMock = p.kind === 'mock'
+  const isMock = p.kind === 'mock' || p.kind === 'webllm'
 
   const loadModels = async () => {
     setLoading(true)
@@ -226,6 +290,7 @@ function ProviderCard({ p }: { p: ProviderConfig }) {
             <ModelRow key={m.id} provider={p} model={m} />
           ))}
         </div>
+        {p.kind === 'webllm' && <GpuNote />}
         {!isMock && (
           <form
             className="mt-2 flex gap-2"

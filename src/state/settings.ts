@@ -48,11 +48,12 @@ export interface SettingsState {
 }
 
 const demo = providerFromPreset(PRESETS[0], 'demo')
+const local = providerFromPreset(PRESETS.find((p) => p.id === 'webllm')!, 'webllm')
 
 export const useSettings = create<SettingsState>()(
   persist(
     (set, get) => ({
-      providers: [demo],
+      providers: [demo, local],
       selected: `demo::${demo.models[0].id}`,
       params: { reasoningEffort: '' },
       mode: 'acceptEdits',
@@ -105,7 +106,15 @@ export const useSettings = create<SettingsState>()(
     }),
     {
       name: 'gh-settings',
-      version: 1,
+      version: 2,
+      migrate: (persisted, version) => {
+        const s = persisted as Partial<SettingsState>
+        // v2: añade los modelos locales (WebLLM) a quien ya tenía la app.
+        if (version < 2 && Array.isArray(s.providers) && !s.providers.some((p) => p.kind === 'webllm')) {
+          s.providers = [...s.providers.slice(0, 1), local, ...s.providers.slice(1)]
+        }
+        return s as SettingsState
+      },
       storage: createJSONStorage(() => idbStorage),
       partialize: (s) => {
         // Nunca se persisten funciones; las claves viven en la bóveda.

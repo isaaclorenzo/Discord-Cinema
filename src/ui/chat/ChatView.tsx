@@ -8,6 +8,8 @@ import { useUi } from '../../state/ui'
 import { cx } from '../cx'
 import { Composer } from './Composer'
 import { Interactions } from './Interactions'
+import { LocalModelStatus } from './LocalModelStatus'
+import { useWebGpu } from '../../core/providers/webllm'
 import { MessageList } from './MessageList'
 import { TodoList } from './ToolCard'
 import { assetUrl } from '../../core/sandbox/host'
@@ -27,6 +29,7 @@ function Welcome({ sessionId }: { sessionId: string }) {
   const isDemo = resolved?.provider.kind === 'mock'
   const guard = useSettings((s) => s.guard.action)
   const vault = useSecrets((s) => s.vaultExists)
+  const gpu = useWebGpu((s) => s.available)
   return (
     <div className="min-h-0 flex-1 overflow-y-auto px-4 sm:px-6">
       <div className="mx-auto flex max-w-3xl flex-col items-center py-10 text-center sm:py-16">
@@ -54,6 +57,26 @@ function Welcome({ sessionId }: { sessionId: string }) {
             </button>
             .
           </p>
+        )}
+        {(isDemo || !resolved) && (
+          <div className="mt-4 w-full max-w-lg rounded-2xl border border-violet-300/25 bg-violet-400/[0.07] px-4 py-3 text-left text-sm">
+            <div className="font-medium text-fg">Modelo real gratis, sin cuentas ni claves</div>
+            <p className="mt-1 text-xs leading-relaxed text-muted">
+              Qwen3 corre dentro de tu navegador con tu GPU (WebGPU). Se descarga una vez (~2 GB) y tus mensajes nunca salen del equipo.
+              {gpu === false && <span className="text-amber"> Este navegador o equipo no tiene WebGPU disponible: usa Chrome o Edge actualizados en un ordenador con GPU.</span>}
+            </p>
+            <button
+              className="btn btn-primary mt-3"
+              disabled={gpu === false}
+              onClick={() => {
+                const ref = 'webllm::Qwen3-1.7B-q4f16_1-MLC'
+                useSessions.getState().patch(sessionId, { modelRef: ref })
+                useSettings.getState().set({ selected: ref })
+              }}
+            >
+              Usar modelo local (Qwen3 1.7B)
+            </button>
+          </div>
         )}
         <div className="mt-8 grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {EXAMPLES.map((ex) => (
@@ -157,6 +180,7 @@ export function ChatView() {
     <div className="flex h-full min-w-0 flex-col">
       <Header sessionId={sessionId} />
       {count === 0 ? <Welcome sessionId={sessionId} /> : <MessageList sessionId={sessionId} />}
+      <LocalModelStatus />
       <Interactions sessionId={sessionId} />
       <Composer sessionId={sessionId} />
     </div>

@@ -1,6 +1,6 @@
 import type { ChatMessage, JsonSchema, RawProviderContent, ToolCall, Usage } from '../types'
 
-export type ProviderKind = 'openai' | 'anthropic' | 'mock'
+export type ProviderKind = 'openai' | 'anthropic' | 'mock' | 'webllm'
 
 export interface ModelInfo {
   id: string
@@ -14,6 +14,10 @@ export interface ModelInfo {
   /** USD por millón de tokens */
   priceIn?: number
   priceOut?: number
+  /** Modelos pequeños (p. ej. locales): menos herramientas y descripciones cortas para que quepan en su contexto. */
+  compactTools?: boolean
+  /** Tamaño aproximado de descarga/VRAM (MB), para modelos locales. */
+  sizeMB?: number
 }
 
 export interface ProviderConfig {

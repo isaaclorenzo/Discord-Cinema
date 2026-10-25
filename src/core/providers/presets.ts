@@ -2,6 +2,7 @@
 // "Cargar modelos" para traer la lista real desde /models del proveedor.
 
 import { MOCK_MODELS } from './mock'
+import { WEBLLM_MODELS } from './webllm'
 import type { ModelInfo, ProviderConfig, ProviderKind } from './types'
 
 export interface ProviderPreset {
@@ -29,6 +30,15 @@ export const PRESETS: ProviderPreset[] = [
     connection: 'direct',
     models: MOCK_MODELS,
     note: 'Modelo simulado que nunca sale del navegador. Úsalo para conocer la harness.',
+  },
+  {
+    id: 'webllm',
+    name: 'Modelos locales (en tu navegador)',
+    kind: 'webllm',
+    baseUrl: 'local://webllm',
+    connection: 'direct',
+    models: WEBLLM_MODELS,
+    note: 'Gratis y sin cuentas: el modelo se descarga una vez y corre en tu GPU con WebGPU. Tus mensajes no salen del equipo. Son modelos pequeños: más lentos y menos capaces que los de la nube.',
   },
   {
     id: 'deepseek',
