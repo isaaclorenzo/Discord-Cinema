@@ -1,6 +1,7 @@
-import { X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { useEffect, useId, type ReactNode } from 'react'
 import { cx } from './cx'
+import { useUi } from '../state/ui'
 
 export function Toggle({ checked, onChange, label, hint, disabled }: { checked: boolean; onChange: (v: boolean) => void; label?: ReactNode; hint?: ReactNode; disabled?: boolean }) {
   const id = useId()
@@ -112,6 +113,9 @@ export function PageHeader({ title, subtitle, icon, actions }: { title: ReactNod
   return (
     <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
       <div className="flex min-w-0 items-center gap-3">
+        <button className="btn btn-ghost btn-icon lg:hidden" onClick={() => useUi.getState().setMobilePanel('sidebar')} aria-label="Abrir menú">
+          <Menu size={17} />
+        </button>
         {icon && <div className="glass grid size-10 shrink-0 place-items-center rounded-2xl text-violet-200">{icon}</div>}
         <div className="min-w-0">
           <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
@@ -120,5 +124,23 @@ export function PageHeader({ title, subtitle, icon, actions }: { title: ReactNod
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </header>
+  )
+}
+
+export function PageShell({ children }: { children: ReactNode }) {
+  return (
+    <div className="h-full overflow-y-auto px-4 py-5 sm:px-8 sm:py-8">
+      <div className="mx-auto max-w-5xl">{children}</div>
+    </div>
+  )
+}
+
+export function Field({ label, hint, children }: { label: ReactNode; hint?: ReactNode; children: ReactNode }) {
+  return (
+    <label className="block">
+      <span className="label">{label}</span>
+      {children}
+      {hint && <span className="mt-1 block text-[11px] leading-relaxed text-faint">{hint}</span>}
+    </label>
   )
 }

@@ -237,8 +237,8 @@ export function Composer({ sessionId }: { sessionId: string }) {
             onKeyDown={onKeyDown}
             onPaste={onPaste}
             rows={1}
-            placeholder={running ? 'El agente está trabajando… (Esc para detener)' : 'Escribe una tarea no sensible… ( / comandos · @ archivos )'}
-            className="block max-h-[260px] w-full resize-none bg-transparent px-3 py-2.5 text-[15px] leading-relaxed text-fg placeholder:text-faint focus:outline-none"
+            placeholder={running ? 'El agente está trabajando… (Esc para detener)' : 'Escribe una tarea no sensible… (/ comandos, @ archivos)'}
+            className="block max-h-[260px] w-full resize-none bg-transparent px-3 py-2.5 text-[15px] leading-relaxed text-fg placeholder:truncate placeholder:text-faint focus:outline-none"
             aria-label="Mensaje"
           />
           <div className="flex items-center gap-1.5 px-1.5 pb-0.5">

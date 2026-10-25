@@ -77,12 +77,13 @@ Environment:
     const timer = setTimeout(() => controller.abort(), timeout)
     const onAbort = () => controller.abort()
     signal.addEventListener('abort', onAbort, { once: true })
+    const cwdBefore = ws.cwd
     try {
       const r = await ws.exec(input.command, { signal: controller.signal })
       return {
         content: formatExec(r.stdout, r.stderr, r.exitCode),
         isError: r.exitCode !== 0 && !r.stdout && !!r.stderr,
-        display: { kind: 'terminal', command: input.command, stdout: r.stdout, stderr: r.stderr, exitCode: r.exitCode, cwd: r.cwd },
+        display: { kind: 'terminal', command: input.command, stdout: r.stdout, stderr: r.stderr, exitCode: r.exitCode, cwd: cwdBefore },
       }
     } catch (e) {
       if (controller.signal.aborted && !signal.aborted) return errorResult(`Command timed out after ${timeout} ms`)
