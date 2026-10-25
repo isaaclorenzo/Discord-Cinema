@@ -71,6 +71,14 @@ export interface ChatMessage {
   meta?: MessageMeta
   /** Contexto oculto inyectado por hooks/skills (se envía al modelo, la UI lo muestra discreto). */
   synthetic?: boolean
+  /** Estado de una herramienta (solo UI). */
+  status?: 'running' | 'done' | 'denied' | 'awaiting'
+  /** Mensaje anterior a una compactación: se muestra, pero no se envía. */
+  archived?: boolean
+  /** Mensaje informativo de la harness (p. ej. /help): solo UI, nunca se envía. */
+  local?: boolean
+  /** Error de la llamada al modelo (solo UI). */
+  error?: { message: string; kind?: 'guard' | 'provider' | 'abort'; findings?: Array<{ label: string; value: string; where: string }> }
 }
 
 export interface TodoItem {

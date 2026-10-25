@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' blob: data: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://cdn.tailwindcss.com; style-src 'unsafe-inline' data: blob: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com; img-src data: blob:; font-src data: https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; media-src data: blob:; connect-src 'none'; form-action 'none'" />
+    <meta name="referrer" content="no-referrer" />
+    <script>
+      // Vista previa aislada de Glasshouse: iframe sandbox sin allow-same-origin,
+      // sin red (connect-src 'none') y sin acceso a la app. Recibe el HTML por
+      // postMessage una sola vez y se reemplaza a sí misma con él.
+      var rendered = false
+      window.addEventListener('message', function (e) {
+        if (rendered || e.source !== window.parent || !e.data || e.data.type !== 'glasshouse:render') return
+        rendered = true
+        document.open()
+        document.write(String(e.data.html || ''))
+        document.close()
+      })
+      window.parent.postMessage({ type: 'glasshouse:ready' }, '*')
+    </script>
+  </head>
+  <body></body>
+</html>
