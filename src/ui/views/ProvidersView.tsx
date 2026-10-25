@@ -11,6 +11,14 @@ import { useUi } from '../../state/ui'
 import { cx } from '../cx'
 import { Field, Modal, PageHeader, PageShell, Spinner, Toggle } from '../primitives'
 
+function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^api\./, '')
+  } catch {
+    return ''
+  }
+}
+
 function ModelRow({ provider, model }: { provider: ProviderConfig; model: ModelInfo }) {
   const [open, setOpen] = useState(false)
   const update = (patch: Partial<ModelInfo>) =>
@@ -166,7 +174,16 @@ function ProviderCard({ p }: { p: ProviderConfig }) {
       {!isMock && (
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <Field label="URL base">
-            <input className="input font-mono text-xs" value={p.baseUrl} onChange={(e) => update({ baseUrl: e.target.value.trim() })} spellCheck={false} />
+            <input className="input font-mono text-xs" value={p.baseUrl} onChange={(e) => {
+                const baseUrl = e.target.value.trim()
+                const patch: Partial<ProviderConfig> = { baseUrl }
+                // Un proveedor personalizado toma el nombre de su dominio mientras no lo renombres.
+                if (p.presetId === 'custom' && (p.name === preset?.name || p.name === hostOf(p.baseUrl))) {
+                  const host = hostOf(baseUrl)
+                  if (host) patch.name = host
+                }
+                update(patch)
+              }} spellCheck={false} />
           </Field>
           <Field label="Clave de API" hint={vault ? 'Se guarda cifrada en tu bóveda.' : 'Solo en memoria: se borra al cerrar la pestaña. Activa la bóveda en Seguridad para recordarla cifrada.'}>
             <div className="relative">

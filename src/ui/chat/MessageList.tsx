@@ -5,6 +5,8 @@ import { maskValue } from '../../core/security/guard'
 import type { ChatMessage } from '../../core/types'
 import { formatUsd } from '../../core/util'
 import { useSessions } from '../../state/sessions'
+import { useUi } from '../../state/ui'
+import { explainProviderError } from '../../core/providers/errors'
 import { Spinner } from '../primitives'
 import { cx } from '../cx'
 import { Markdown } from './Markdown'
@@ -101,16 +103,28 @@ function ErrorCard({ m, sessionId, isLast }: { m: ChatMessage; sessionId: string
       </div>
     )
   }
+  const hint = explainProviderError(err.message)
   return (
     <div className="rounded-2xl border border-rose-300/25 bg-rose-400/[0.06] p-4">
       <div className="flex items-center gap-2 text-sm font-medium text-rose-100">
-        <TriangleAlert size={16} /> Error del proveedor
+        <TriangleAlert size={16} /> {hint.title}
       </div>
-      <p className="mt-1 break-words font-mono text-xs text-rose-100/80">{err.message}</p>
+      <p className="mt-1 text-[13px] leading-relaxed text-rose-50/90">{hint.hint}</p>
+      <details className="mt-2">
+        <summary className="cursor-pointer text-[11px] text-rose-100/60">Detalle técnico</summary>
+        <p className="mt-1 break-words font-mono text-xs text-rose-100/80">{err.message}</p>
+      </details>
       {isLast && (
-        <button className="btn mt-3" onClick={() => regenerate(sessionId)}>
-          <RotateCcw size={13} /> Reintentar
-        </button>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button className="btn" onClick={() => regenerate(sessionId)}>
+            <RotateCcw size={13} /> Reintentar
+          </button>
+          {hint.accountIssue && (
+            <button className="btn" onClick={() => useUi.getState().setView('providers')}>
+              Abrir Proveedores
+            </button>
+          )}
+        </div>
       )}
     </div>
   )
