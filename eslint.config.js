@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'public/pyodide', 'coverage']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -16,8 +16,15 @@ export default defineConfig([
       reactRefresh.configs.vite,
     ],
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+      ecmaVersion: 2022,
+      globals: { ...globals.browser, ...globals.worker },
     },
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    },
+  },
+  {
+    files: ['server/**/*.ts', 'api/**/*.ts', 'scripts/**/*.mjs', 'vite.config.ts'],
+    languageOptions: { globals: globals.node },
   },
 ])
