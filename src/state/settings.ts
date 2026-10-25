@@ -7,6 +7,7 @@ import { DEFAULT_GUARD, type GuardConfig } from '../core/security/guard'
 import { idbStorage } from '../core/storage/db'
 import type { PermissionMode, PermissionRules } from '../core/types'
 import { uid } from '../core/util'
+import { relayState } from './relay'
 
 export type RightTab = 'files' | 'terminal' | 'tasks' | 'network' | 'preview'
 export type SearchBackend = 'duckduckgo' | 'brave' | 'tavily' | 'searxng' | 'exa'
@@ -29,6 +30,8 @@ export interface SettingsState {
   disabledTools: string[]
   /** Modelo para resumir páginas de WebFetch ('' = el mismo de la sesión). */
   helperModel: string
+  /** URL del relay ('' = /api/relay del propio despliegue). */
+  relayUrl: string
   ui: { rightPanel: boolean; rightTab: RightTab; sidebar: boolean }
   onboarded: boolean
 
@@ -64,6 +67,7 @@ export const useSettings = create<SettingsState>()(
       search: { backend: 'duckduckgo', searxngUrl: '' },
       disabledTools: [],
       helperModel: '',
+      relayUrl: '',
       ui: { rightPanel: true, rightTab: 'files', sidebar: true },
       onboarded: false,
 
@@ -74,7 +78,10 @@ export const useSettings = create<SettingsState>()(
       addProvider: (presetId) => {
         const preset = PRESETS.find((p) => p.id === presetId) ?? PRESETS[PRESETS.length - 1]
         const id = get().providers.some((p) => p.id === preset.id) ? uid(preset.id) : preset.id
-        set((s) => ({ providers: [...s.providers, providerFromPreset(preset, id)] }))
+        const provider = providerFromPreset(preset, id)
+        // Sin relay (p. ej. GitHub Pages) la única opción posible es la conexión directa.
+        if (relayState.status === 'missing') provider.connection = 'direct'
+        set((s) => ({ providers: [...s.providers, provider] }))
         return id
       },
       updateProvider: (id, patch) => set((s) => ({ providers: s.providers.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),

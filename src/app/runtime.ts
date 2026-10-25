@@ -21,6 +21,7 @@ import type { ChatMessage, ImagePart, PermissionMode, ToolDisplay } from '../cor
 import { truncate, uid } from '../core/util'
 import { webSearch } from '../core/web/search'
 import { enabledAgents, enabledCommands, enabledHooks, enabledMcpServers, enabledPluginTools, enabledSkills, pluginFiles } from '../state/extensions'
+import { defaultRelayUrl } from '../state/relay'
 import { useSecrets } from '../state/secrets'
 import { useSessions } from '../state/sessions'
 import { resolveModel, useSettings } from '../state/settings'
@@ -30,6 +31,7 @@ import { runBuiltinCommand } from './builtin-commands'
 
 configureNet({
   relayToken: () => useSecrets.getState().getKey('relay'),
+  relayUrl: () => useSettings.getState().relayUrl || defaultRelayUrl(),
   guard: () => useSettings.getState().guard,
 })
 

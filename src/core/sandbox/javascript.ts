@@ -2,6 +2,7 @@
 // (aislamiento total entre ejecuciones y timeout duro con terminate()).
 
 import type { Workspace } from './workspace'
+import { assetUrl, sandboxReady } from './host'
 
 export interface JsRunOutput {
   stdout: string
@@ -30,8 +31,9 @@ export interface JsOptions {
   onOutput?: (stream: 'stdout' | 'stderr', text: string) => void
 }
 
-export function runJavaScript(ws: Workspace, code: string, opts: JsOptions = {}): Promise<JsRunOutput> {
-  const worker = new Worker('/sandbox/js-worker.js', { name: 'glasshouse-js' })
+export async function runJavaScript(ws: Workspace, code: string, opts: JsOptions = {}): Promise<JsRunOutput> {
+  await sandboxReady()
+  const worker = new Worker(assetUrl('sandbox/js-worker.js'), { name: 'glasshouse-js' })
   const timeoutMs = opts.timeoutMs ?? 30_000
   const id = 1
   return new Promise((resolve) => {

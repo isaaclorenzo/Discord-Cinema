@@ -5,8 +5,9 @@
 // red salvo esas dos rutas, para que el código del modelo no pueda enviar
 // datos a ningún sitio.
 
-const ORIGIN = self.location.origin
-const PYODIDE_BASE = `${ORIGIN}/pyodide/`
+// La base respeta despliegues en subcarpetas (p. ej. GitHub Pages /Discord-Cinema/).
+const BASE = new URL('../', self.location.href).href
+const PYODIDE_BASE = `${BASE}pyodide/`
 let packageCdn = null
 
 // ---------------------------------------------------------------------------

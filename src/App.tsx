@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useExtensions } from './state/extensions'
+import { useRelay } from './state/relay'
 import { useSecrets } from './state/secrets'
 import { useSessions } from './state/sessions'
 import { useSettings } from './state/settings'
@@ -64,6 +65,13 @@ export default function App() {
   const rightPanel = useSettings((s) => s.ui.rightPanel)
   const currentId = useSessions((s) => s.currentId)
   const desktop = useMediaQuery('(min-width: 1024px)')
+  const relayUrl = useSettings((s) => s.relayUrl)
+  const secretsReady = useSecrets((s) => s.ready)
+  const relayToken = useSecrets((s) => s.keys.relay ?? '')
+
+  useEffect(() => {
+    if (ready && secretsReady) void useRelay.getState().check(relayUrl, relayToken)
+  }, [ready, secretsReady, relayUrl, relayToken])
 
   if (!ready) {
     return (

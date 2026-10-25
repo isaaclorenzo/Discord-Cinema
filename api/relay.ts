@@ -193,7 +193,52 @@ function validateTarget(raw: string | null, allowList: string[]): URL | Response
   return url
 }
 
+const CORS_ALLOWED_HEADERS = new Set([
+  ...FORWARD_REQUEST_HEADERS,
+  'x-relay-url',
+  'x-harness-token',
+  'x-relay-follow',
+  'x-relay-max-bytes',
+])
+
+/**
+ * CORS opcional: solo para los orígenes listados en RELAY_ALLOWED_ORIGINS
+ * (p. ej. https://usuario.github.io cuando la app está en GitHub Pages y el
+ * relay en Vercel). Sin esa variable, el relay solo sirve a su propio origen.
+ */
+function corsHeaders(request: Request, env: RelayOptions['env']): Record<string, string> | null {
+  const origin = request.headers.get('origin')
+  if (!origin) return null
+  const allowed = (env.RELAY_ALLOWED_ORIGINS ?? '')
+    .split(',')
+    .map((s) => s.trim().replace(/\/+$/, ''))
+    .filter(Boolean)
+  if (!allowed.includes(origin)) return null
+  const requested = (request.headers.get('access-control-request-headers') ?? '')
+    .split(',')
+    .map((h) => h.trim().toLowerCase())
+    .filter((h) => h && (CORS_ALLOWED_HEADERS.has(h) || h.startsWith('x-relay-header-')))
+  return {
+    'access-control-allow-origin': origin,
+    'access-control-allow-methods': 'GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS',
+    'access-control-allow-headers': [...new Set([...CORS_ALLOWED_HEADERS, ...requested])].join(', '),
+    'access-control-expose-headers': 'x-relay-final-url, mcp-session-id, retry-after, content-type',
+    'access-control-max-age': '600',
+    vary: 'Origin',
+  }
+}
+
 export async function handleRelay(request: Request, opts: RelayOptions): Promise<Response> {
+  const cors = corsHeaders(request, opts.env)
+  if (request.method === 'OPTIONS') return new Response(null, { status: cors ? 204 : 403, headers: cors ?? {} })
+  const res = await relay(request, opts)
+  if (!cors) return res
+  const headers = new Headers(res.headers)
+  for (const [k, v] of Object.entries(cors)) headers.set(k, v)
+  return new Response(res.body, { status: res.status, headers })
+}
+
+async function relay(request: Request, opts: RelayOptions): Promise<Response> {
   const { env } = opts
   const token = env.HARNESS_ACCESS_TOKEN?.trim()
   if (!token && !opts.dev) {
@@ -334,3 +379,4 @@ export const PUT = vercel
 export const PATCH = vercel
 export const DELETE = vercel
 export const HEAD = vercel
+export const OPTIONS = vercel

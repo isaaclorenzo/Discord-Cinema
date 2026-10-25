@@ -96,3 +96,25 @@ export function relayDevPlugin(): Plugin {
     },
   }
 }
+
+/**
+ * En el build inyecta la CSP principal como <meta> en index.html, para que
+ * también se aplique en hostings sin cabeceras propias (GitHub Pages).
+ * frame-ancestors se omite porque no tiene efecto en una meta.
+ */
+export function metaCspPlugin(): Plugin {
+  const main = headerRules.find((r) => !r.sandboxOnly)
+  const csp = main?.headers.find((h) => h.key === 'Content-Security-Policy')?.value ?? ''
+  const metaCsp = csp
+    .split(';')
+    .map((d) => d.trim())
+    .filter((d) => d && !d.startsWith('frame-ancestors'))
+    .join('; ')
+  return {
+    name: 'glasshouse-meta-csp',
+    apply: 'build',
+    transformIndexHtml() {
+      return [{ tag: 'meta', attrs: { 'http-equiv': 'Content-Security-Policy', content: metaCsp }, injectTo: 'head-prepend' }]
+    },
+  }
+}

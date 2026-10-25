@@ -10,7 +10,7 @@ import { resolveModel, useSettings } from '../state/settings'
 import { useUi } from '../state/ui'
 import { getWorkspace } from '../state/workspaces'
 import { exportSessionMarkdown, downloadText } from './export'
-import { compactSession, runSession, setSessionMode } from './runtime'
+import { compactSession, runSession, setSessionMode, toolsFor } from './runtime'
 
 export interface BuiltinCommandInfo {
   name: string
@@ -126,7 +126,6 @@ export async function runBuiltinCommand(sessionId: string, name: string, args: s
       info(sessionId, `**Esta conversación:** ${(session?.tokens ?? 0).toLocaleString('es')} tokens · ${formatUsd(session?.costUsd)} (según los precios configurados en Proveedores).`)
       return true
     case 'tools': {
-      const { toolsFor } = await import('./runtime')
       const tools = await toolsFor()
       info(sessionId, `### Herramientas (${tools.length})\n${tools.map((t) => `- **${t.name}**${t.source ? ` _(${t.source})_` : ''} — ${t.description.split('\n')[0]}`).join('\n')}`)
       return true

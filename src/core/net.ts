@@ -8,10 +8,12 @@ import { useNetlog, type NetPurpose } from './security/netlog'
 
 export interface NetEnv {
   relayToken: () => string
+  /** URL del relay (por defecto, /api/relay del propio despliegue). */
+  relayUrl: () => string
   guard: () => GuardConfig
 }
 
-let env: NetEnv = { relayToken: () => '', guard: () => DEFAULT_GUARD }
+let env: NetEnv = { relayToken: () => '', relayUrl: () => '/api/relay', guard: () => DEFAULT_GUARD }
 
 export function configureNet(next: NetEnv): void {
   env = next
@@ -133,7 +135,7 @@ export async function netFetch(url: string, init: RequestInit, opts: NetOptions)
     if (token) headers['x-harness-token'] = token
     if (opts.follow) headers['x-relay-follow'] = '1'
     if (opts.maxBytes) headers['x-relay-max-bytes'] = String(opts.maxBytes)
-    target = '/api/relay'
+    target = env.relayUrl()
     reqInit = { ...init, body, headers, credentials: 'omit' }
   } else {
     reqInit = { ...reqInit, credentials: 'omit', referrerPolicy: 'no-referrer' }
@@ -142,6 +144,11 @@ export async function netFetch(url: string, init: RequestInit, opts: NetOptions)
   try {
     const res = await fetch(target, reqInit)
     log.update(id, { status: res.status, durationMs: Math.round(performance.now() - started) })
+    if (opts.via === 'relay' && (res.status === 404 || res.status === 405) && !res.headers.get('x-relay-final-url')) {
+      const msg = 'No hay relay en este despliegue (p. ej. GitHub Pages). Usa conexión «Directa» o configura la URL de un relay en Seguridad.'
+      log.update(id, { error: msg })
+      throw new Error(msg)
+    }
     if (opts.via === 'relay' && res.status >= 400 && res.headers.get('content-type')?.includes('application/json') && !res.headers.get('x-relay-final-url')) {
       // Error del propio relay (no del destino): se muestra claro.
       const data = (await res.clone().json().catch(() => null)) as { error?: string } | null

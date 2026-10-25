@@ -5,6 +5,7 @@ import { useSessions } from '../state/sessions'
 import { useSettings } from '../state/settings'
 import { useUi, type View } from '../state/ui'
 import { cx } from './cx'
+import { assetUrl } from '../core/sandbox/host'
 
 const NAV: Array<{ id: View; label: string; icon: ReactNode }> = [
   { id: 'chat', label: 'Chat', icon: <MessagesSquare size={16} /> },
@@ -41,7 +42,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex items-center gap-2.5 px-4 pb-3 pt-4">
-        <img src="/favicon.svg" alt="" className="size-8" />
+        <img src={assetUrl('favicon.svg')} alt="" className="size-8" />
         <div className="min-w-0 flex-1">
           <div className="text-gradient text-[15px] font-semibold leading-tight">Glasshouse</div>
           <div className="text-[11px] text-faint">harness aislada de modelos</div>

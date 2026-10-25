@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react'
 import { useSettings } from '../../state/settings'
 import { useUi } from '../../state/ui'
 import { Empty } from '../primitives'
+import { assetUrl } from '../../core/sandbox/host'
 
 /** Iframe sin allow-same-origin: el contenido no puede leer la app ni sus claves, y su CSP bloquea la red. */
 export function PreviewPanel({ sessionId }: { sessionId: string }) {
@@ -43,7 +44,7 @@ export function PreviewPanel({ sessionId }: { sessionId: string }) {
         key={`${current.version}-${cdn}`}
         ref={frame}
         title="Vista previa aislada"
-        src={cdn ? '/sandbox/preview-cdn.html' : '/sandbox/preview-strict.html'}
+        src={assetUrl(cdn ? 'sandbox/preview-cdn.html' : 'sandbox/preview-strict.html')}
         sandbox="allow-scripts"
         referrerPolicy="no-referrer"
         className="min-h-0 w-full flex-1 bg-white"

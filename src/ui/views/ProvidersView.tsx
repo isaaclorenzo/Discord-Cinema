@@ -6,6 +6,7 @@ import type { ModelInfo, ProviderConfig } from '../../core/providers/types'
 import { uid } from '../../core/util'
 import { useSecrets } from '../../state/secrets'
 import { useSettings } from '../../state/settings'
+import { useRelay } from '../../state/relay'
 import { useUi } from '../../state/ui'
 import { cx } from '../cx'
 import { Field, Modal, PageHeader, PageShell, Spinner, Toggle } from '../primitives'
@@ -230,6 +231,28 @@ function ProviderCard({ p }: { p: ProviderConfig }) {
   )
 }
 
+function RelayBanner() {
+  const status = useRelay((s) => s.status)
+  if (status === 'ok' || status === 'checking') return null
+  const text =
+    status === 'missing'
+      ? 'Este despliegue no tiene relay (por ejemplo, GitHub Pages). Usa conexión «Directa» con proveedores que la permiten (OpenRouter, Anthropic, Ollama o LM Studio en local) o configura un relay externo en Seguridad. WebFetch, WebSearch y MCP también lo necesitan.'
+      : status === 'needs-token'
+        ? 'El relay necesita el token de acceso: escríbelo en Seguridad → Relay propio.'
+        : 'El relay está desactivado en el servidor: define HARNESS_ACCESS_TOKEN en las variables de entorno del despliegue.'
+  return (
+    <p className="mb-4 flex items-start gap-2 rounded-2xl border border-amber-300/25 bg-amber-300/[0.06] px-4 py-3 text-xs leading-relaxed text-amber-100/85">
+      <TriangleAlert size={14} className="mt-0.5 shrink-0" />
+      <span>
+        {text}{' '}
+        <button className="underline underline-offset-2" onClick={() => useUi.getState().setView('security')}>
+          Abrir Seguridad
+        </button>
+      </span>
+    </p>
+  )
+}
+
 export function ProvidersView() {
   const providers = useSettings((s) => s.providers)
   const [adding, setAdding] = useState(false)
@@ -245,6 +268,7 @@ export function ProvidersView() {
           </button>
         }
       />
+      <RelayBanner />
       <div className="space-y-4">
         {providers.map((p) => (
           <ProviderCard key={p.id} p={p} />

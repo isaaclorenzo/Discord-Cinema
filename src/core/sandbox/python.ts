@@ -1,6 +1,7 @@
 // Ejecuta Python en el worker de Pyodide, sincronizando /workspace.
 
 import { HOME, type Workspace } from './workspace'
+import { assetUrl, sandboxReady } from './host'
 
 export interface RunOutput {
   stdout: string
@@ -53,7 +54,7 @@ class PythonRunner {
 
   private ensure(): Worker {
     if (this.worker) return this.worker
-    const w = new Worker('/sandbox/py-worker.js', { type: 'module', name: 'glasshouse-python' })
+    const w = new Worker(assetUrl('sandbox/py-worker.js'), { type: 'module', name: 'glasshouse-python' })
     w.onmessage = (ev) => {
       const msg = ev.data
       if (msg?.type === 'status') {
@@ -94,6 +95,7 @@ class PythonRunner {
       files.push([f.path, await ws.readBytes(f.path)])
     }
     const id = ++this.seq
+    await sandboxReady()
     const worker = this.ensure()
     const timeoutMs = opts.timeoutMs ?? 120_000
 

@@ -5,6 +5,7 @@ import { useNetlog } from '../../core/security/netlog'
 import { dbClear } from '../../core/storage/db'
 import { useSecrets } from '../../state/secrets'
 import { useSettings } from '../../state/settings'
+import { defaultRelayUrl, useRelay } from '../../state/relay'
 import { useUi } from '../../state/ui'
 import { cx } from '../cx'
 import { Field, PageHeader, PageShell, Section, Toggle } from '../primitives'
@@ -115,6 +116,43 @@ function Vault() {
   )
 }
 
+const RELAY_LABELS = {
+  checking: ['Comprobando…', 'text-muted'],
+  ok: ['Disponible', 'text-ok'],
+  'needs-token': ['Necesita token', 'text-amber'],
+  disabled: ['Desactivado en el servidor', 'text-amber'],
+  missing: ['No disponible', 'text-rose-200'],
+} as const
+
+function RelaySection({ relayToken }: { relayToken: string }) {
+  const relayUrl = useSettings((s) => s.relayUrl)
+  const status = useRelay((s) => s.status)
+  const message = useRelay((s) => s.message)
+  const [label, tone] = RELAY_LABELS[status]
+  return (
+    <Section
+      title="Relay propio"
+      description="El relay reenvía las peticiones a proveedores sin CORS, WebFetch, WebSearch y MCP. En Vercel usa /api/relay con el token de la variable HARNESS_ACCESS_TOKEN; en local (npm run dev) no necesita token. En GitHub Pages no hay relay: usa conexión directa o apunta a un relay desplegado en Vercel (añade el origen de Pages a RELAY_ALLOWED_ORIGINS)."
+      actions={<span className={cx('chip', tone)}>{label}</span>}
+    >
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label="URL del relay" hint={`Vacío = ${defaultRelayUrl()}`}>
+          <input className="input font-mono text-xs" value={relayUrl} onChange={(e) => useSettings.getState().set({ relayUrl: e.target.value.trim() })} placeholder="https://mi-glasshouse.vercel.app/api/relay" />
+        </Field>
+        <Field label="Token del relay">
+          <input className="input font-mono text-xs" type="password" value={relayToken} onChange={(e) => useSecrets.getState().setKey('relay', e.target.value.trim())} placeholder="El mismo valor que HARNESS_ACCESS_TOKEN" />
+        </Field>
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <button className="btn px-2.5 py-1 text-xs" onClick={() => void useRelay.getState().check(relayUrl, relayToken)}>
+          <Network size={12} /> Comprobar
+        </button>
+        <span className="text-xs text-muted">{message}</span>
+      </div>
+    </Section>
+  )
+}
+
 export function SecurityView() {
   const guard = useSettings((s) => s.guard)
   const setGuard = useSettings((s) => s.setGuard)
@@ -197,14 +235,7 @@ export function SecurityView() {
 
         <Vault />
 
-        <Section
-          title="Relay propio"
-          description="Si despliegas en Vercel, el relay /api/relay exige el token que configures en la variable de entorno HARNESS_ACCESS_TOKEN. Escríbelo aquí (se guarda en la bóveda). En local (npm run dev) no hace falta."
-        >
-          <Field label="Token del relay">
-            <input className="input font-mono text-xs" type="password" value={relayToken} onChange={(e) => useSecrets.getState().setKey('relay', e.target.value.trim())} placeholder="El mismo valor que HARNESS_ACCESS_TOKEN" />
-          </Field>
-        </Section>
+        <RelaySection relayToken={relayToken} />
 
         <Section title={`Inspector de red (${netCount})`} description="Historial de esta sesión del navegador: no se guarda en disco.">
           <div className="glass-inset h-[28rem] overflow-hidden rounded-2xl">

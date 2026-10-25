@@ -10,6 +10,7 @@ import { Composer } from './Composer'
 import { Interactions } from './Interactions'
 import { MessageList } from './MessageList'
 import { TodoList } from './ToolCard'
+import { assetUrl } from '../../core/sandbox/host'
 
 const EXAMPLES = [
   { icon: <Sparkles size={15} />, title: 'Recorrido rápido', prompt: 'Muéstrame lo que puedes hacer en este sandbox' },
@@ -30,7 +31,7 @@ function Welcome({ sessionId }: { sessionId: string }) {
     <div className="min-h-0 flex-1 overflow-y-auto px-4 sm:px-6">
       <div className="mx-auto flex max-w-3xl flex-col items-center py-10 text-center sm:py-16">
         <div className="glass mb-5 grid size-16 place-items-center rounded-3xl">
-          <img src="/favicon.svg" alt="" className="size-10" />
+          <img src={assetUrl('favicon.svg')} alt="" className="size-10" />
         </div>
         <h1 className="text-gradient text-3xl font-semibold tracking-tight sm:text-4xl">Glasshouse</h1>
         <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted">
