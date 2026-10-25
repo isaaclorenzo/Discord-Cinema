@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { relayDevPlugin } from './server/vite-relay'
+import { relayDevPlugin } from './server/vite-relay.ts'
 
 // https://vite.dev/config/
 export default defineConfig({

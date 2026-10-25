@@ -3,7 +3,34 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Connect, Plugin } from 'vite'
 import { loadEnv } from 'vite'
-import { handleRelay } from '../api/relay'
+import { handleRelay } from '../api/relay.ts'
+import vercelConfig from '../vercel.json' with { type: 'json' }
+
+interface HeaderRule {
+  source: string
+  headers: Array<{ key: string; value: string }>
+}
+
+const headerRules = (vercelConfig.headers as HeaderRule[]).map((r) => ({
+  re: new RegExp(`^${r.source}$`),
+  sandboxOnly: r.source.startsWith('/sandbox/'),
+  headers: r.headers,
+}))
+
+/**
+ * Aplica las mismas cabeceras de seguridad que vercel.json. En `vite dev` solo
+ * las de /sandbox/* (la CSP principal rompería el HMR); en `vite preview`, todas.
+ */
+function securityHeaders(all: boolean): Connect.NextHandleFunction {
+  return (req, res, next) => {
+    const path = (req.url ?? '/').split('?')[0]
+    for (const rule of headerRules) {
+      if (!all && !rule.sandboxOnly) continue
+      if (rule.re.test(path)) for (const h of rule.headers) res.setHeader(h.key, h.value)
+    }
+    next()
+  }
+}
 
 function toRequest(req: IncomingMessage, body: Buffer | undefined, signal: AbortSignal): Request {
   const headers = new Headers()
@@ -60,9 +87,11 @@ export function relayDevPlugin(): Plugin {
       env = loadEnv(config.mode, config.root, '')
     },
     configureServer(server) {
+      server.middlewares.use(securityHeaders(false))
       server.middlewares.use('/api/relay', middleware(env))
     },
     configurePreviewServer(server) {
+      server.middlewares.use(securityHeaders(true))
       server.middlewares.use('/api/relay', middleware(env))
     },
   }
