@@ -31,7 +31,7 @@ const HELLO_PY = `import platform, sys
 def saludo(nombre: str) -> str:
     return f"Hola, {nombre}! Esto corre en un sandbox aislado."
 
-print(saludo("Glasshouse"))
+print(saludo("ISC AGENT"))
 print("Python", sys.version.split()[0], "en", platform.system() or "WebAssembly")
 print("Suma de 1..10 =", sum(range(1, 11)))
 `

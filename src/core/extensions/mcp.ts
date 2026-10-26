@@ -33,7 +33,7 @@ async function connect(s: McpServerDef, secret: string): Promise<Conn> {
   const headers: Record<string, string> = { ...(s.headers ?? {}) }
   if (secret) headers.authorization = secret.startsWith('Bearer ') ? secret : `Bearer ${secret}`
   const url = new URL(s.url)
-  const client = new Client({ name: 'glasshouse', version: '0.1.0' })
+  const client = new Client({ name: 'isc-agent', version: '0.1.0' })
   if (s.transport === 'sse') {
     await client.connect(new SSEClientTransport(url, { fetch: fetchFn, requestInit: { headers } }))
   } else {

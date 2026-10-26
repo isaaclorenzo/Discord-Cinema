@@ -82,7 +82,7 @@ function middleware(env: Record<string, string>): Connect.NextHandleFunction {
 export function relayDevPlugin(): Plugin {
   let env: Record<string, string> = {}
   return {
-    name: 'glasshouse-relay',
+    name: 'isc-agent-relay',
     configResolved(config) {
       env = loadEnv(config.mode, config.root, '')
     },
@@ -111,7 +111,7 @@ export function metaCspPlugin(): Plugin {
     .filter((d) => d && !d.startsWith('frame-ancestors'))
     .join('; ')
   return {
-    name: 'glasshouse-meta-csp',
+    name: 'isc-agent-meta-csp',
     apply: 'build',
     transformIndexHtml() {
       return [{ tag: 'meta', attrs: { 'http-equiv': 'Content-Security-Policy', content: metaCsp }, injectTo: 'head-prepend' }]

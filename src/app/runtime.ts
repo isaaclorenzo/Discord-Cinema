@@ -267,7 +267,7 @@ async function toolsFor(def?: AgentDef, depth = 0, model?: ModelInfo): Promise<A
     try {
       extra = [...extra, ...(await loadMcpTools(servers, (id) => useSecrets.getState().getKey(id)))]
     } catch (e) {
-      console.warn('[glasshouse] MCP', e)
+      console.warn('[isc-agent] MCP', e)
     }
   }
   return buildToolset({

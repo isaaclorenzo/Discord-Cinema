@@ -15,7 +15,7 @@ export function LocalModelStatus() {
             <span>{Math.round(progress * 100)}%</span>
           </div>
           <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/10">
-            <div className="h-full rounded-full bg-gradient-to-r from-violet-400 to-cyan-300 transition-all" style={{ width: `${Math.max(2, progress * 100)}%` }} />
+            <div className="h-full rounded-full bg-gradient-to-r from-sky-400 to-cyan-300 transition-all" style={{ width: `${Math.max(2, progress * 100)}%` }} />
           </div>
           <div className="mt-1 truncate text-[11px] text-faint">{text}</div>
         </div>

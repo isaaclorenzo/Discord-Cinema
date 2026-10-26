@@ -103,7 +103,7 @@ function ModelRow({ provider, model }: { provider: ProviderConfig; model: ModelI
         {model.vision && <span className="chip">visión</span>}
         {provider.kind === 'webllm' && <LocalModelActions id={model.id} sizeMB={model.sizeMB} />}
         <button
-          className={cx('btn px-2 py-1 text-xs', selected && 'border-violet-300/40 text-violet-100')}
+          className={cx('btn px-2 py-1 text-xs', selected && 'border-sky-300/40 text-sky-100')}
           onClick={() => {
             useSettings.getState().set({ selected: `${provider.id}::${model.id}` })
             useUi.getState().toast(`Modelo por defecto: ${model.id}`, 'success')
@@ -202,7 +202,7 @@ function ProviderCard({ p }: { p: ProviderConfig }) {
   return (
     <section className={cx('glass rounded-[var(--radius-glass)] p-5', !p.enabled && 'opacity-60')}>
       <div className="flex flex-wrap items-start gap-3">
-        <div className="glass-inset grid size-10 shrink-0 place-items-center rounded-2xl text-violet-200">
+        <div className="glass-inset grid size-10 shrink-0 place-items-center rounded-2xl text-sky-200">
           <Server size={17} />
         </div>
         <div className="min-w-0 flex-1">
@@ -363,12 +363,12 @@ function DetectProvider({ onDone }: { onDone: () => void }) {
     }
   }
   return (
-    <div className="rounded-2xl border border-violet-300/25 bg-violet-400/[0.06] p-4">
+    <div className="rounded-2xl border border-sky-300/25 bg-sky-400/[0.06] p-4">
       <div className="flex items-center gap-2 text-sm font-medium">
-        <Wand2 size={15} className="text-violet-200" /> Cualquier proveedor: detección automática
+        <Wand2 size={15} className="text-sky-200" /> Cualquier proveedor: detección automática
       </div>
       <p className="mt-1 text-xs leading-relaxed text-muted">
-        Pega la URL de la API (OpenAI-compatible o Anthropic) y tu clave. Glasshouse averigua la ruta, la autenticación, la conexión y los modelos, y se adapta solo a las diferencias de cada proveedor al usarlo.
+        Pega la URL de la API (OpenAI-compatible o Anthropic) y tu clave. ISC AGENT averigua la ruta, la autenticación, la conexión y los modelos, y se adapta solo a las diferencias de cada proveedor al usarlo.
       </p>
       <form
         className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto]"

@@ -25,11 +25,12 @@ export const useRelay = create<RelayStore>((set) => ({
     let status: RelayStatus = 'missing'
     let message = 'No hay relay en esta dirección.'
     try {
-      const res = await fetch(url || defaultRelayUrl(), { headers: token ? { 'x-harness-token': token } : {}, credentials: 'omit' })
+      const res = await fetch(url || defaultRelayUrl(), { headers: { 'x-relay-ping': '1', ...(token ? { 'x-harness-token': token } : {}) }, credentials: 'omit' })
       const type = res.headers.get('content-type') ?? ''
       if (type.includes('application/json')) {
         const body = (await res.json().catch(() => ({}))) as { error?: string }
-        if (res.status === 400) {
+        // 200 = sonda nueva; 400 = relay antiguo sin sonda (falta x-relay-url).
+        if (res.status === 200 || res.status === 400) {
           status = 'ok'
           message = 'Relay disponible.'
         } else if (res.status === 401) {

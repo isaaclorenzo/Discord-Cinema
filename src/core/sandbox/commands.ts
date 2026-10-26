@@ -16,7 +16,7 @@ function stdinText(stdin: unknown): string {
 function pythonCommand(name: string, ws: Workspace) {
   return defineCommand(name, async (args, ctx) => {
     if (args[0] === '-V' || args[0] === '--version') {
-      return { stdout: 'Python 3.14 (Pyodide, sandbox de Glasshouse)\n', stderr: '', exitCode: 0 }
+      return { stdout: 'Python 3.14 (Pyodide, sandbox de ISC AGENT)\n', stderr: '', exitCode: 0 }
     }
     let code: string
     let argv: string[]
@@ -47,7 +47,7 @@ function pythonCommand(name: string, ws: Workspace) {
 function nodeCommand(name: string, ws: Workspace) {
   return defineCommand(name, async (args, ctx) => {
     if (args[0] === '-v' || args[0] === '--version') {
-      return { stdout: 'v0-sandbox (worker de JavaScript de Glasshouse, sin red)\n', stderr: '', exitCode: 0 }
+      return { stdout: 'v0-sandbox (worker de JavaScript de ISC AGENT, sin red)\n', stderr: '', exitCode: 0 }
     }
     let code: string
     let argv: string[]

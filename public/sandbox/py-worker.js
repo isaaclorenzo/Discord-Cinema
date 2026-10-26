@@ -1,4 +1,4 @@
-// Worker de Python (Pyodide) de Glasshouse.
+// Worker de Python (Pyodide) de ISC AGENT.
 //
 // Se sirve como archivo estático con su propia CSP (connect-src limitado a
 // /pyodide/ y al CDN de paquetes). Además, aquí dentro se anula todo acceso a
@@ -212,7 +212,7 @@ async function run(msg) {
     const text = e && e.message ? e.message : String(e)
     error = text
     if (/ModuleNotFoundError/.test(text) && !allowPackages) {
-      error += '\n[Glasshouse] Los paquetes externos (numpy, pandas…) están desactivados. Actívalos en Ajustes → Sandbox.'
+      error += '\n[ISC AGENT] Los paquetes externos (numpy, pandas…) están desactivados. Actívalos en Ajustes → Sandbox.'
     }
   } finally {
     py.setStdin({ stdin: () => null })
@@ -228,7 +228,7 @@ async function run(msg) {
       if (!sameBytes(before.get(p), data)) changed.push([p, data])
     }
   } catch (e) {
-    post('stderr', `[Glasshouse] Error leyendo archivos: ${e}\n`)
+    post('stderr', `[ISC AGENT] Error leyendo archivos: ${e}\n`)
   }
   const deleted = [...before.keys()].filter((p) => !now.has(p))
   self.postMessage({ type: 'done', id, ok, error, result, files: changed, deleted })

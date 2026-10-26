@@ -54,7 +54,7 @@ class PythonRunner {
 
   private ensure(): Worker {
     if (this.worker) return this.worker
-    const w = new Worker(assetUrl('sandbox/py-worker.js'), { type: 'module', name: 'glasshouse-python' })
+    const w = new Worker(assetUrl('sandbox/py-worker.js'), { type: 'module', name: 'isc-agent-python' })
     w.onmessage = (ev) => {
       const msg = ev.data
       if (msg?.type === 'status') {
@@ -112,7 +112,7 @@ class PythonRunner {
       }
       const kill = (reason: string) => {
         this.reset()
-        stderr += `\n[Glasshouse] ${reason}. El intérprete se ha reiniciado.\n`
+        stderr += `\n[ISC AGENT] ${reason}. El intérprete se ha reiniciado.\n`
         finish({ ok: false, timedOut: true, error: reason, changedFiles: [] })
       }
       const timer = setTimeout(() => kill(`Tiempo agotado (${Math.round(timeoutMs / 1000)} s)`), timeoutMs)

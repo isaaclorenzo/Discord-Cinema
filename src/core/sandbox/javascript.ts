@@ -33,7 +33,7 @@ export interface JsOptions {
 
 export async function runJavaScript(ws: Workspace, code: string, opts: JsOptions = {}): Promise<JsRunOutput> {
   await sandboxReady()
-  const worker = new Worker(assetUrl('sandbox/js-worker.js'), { name: 'glasshouse-js' })
+  const worker = new Worker(assetUrl('sandbox/js-worker.js'), { name: 'isc-agent-js' })
   const timeoutMs = opts.timeoutMs ?? 30_000
   const id = 1
   return new Promise((resolve) => {

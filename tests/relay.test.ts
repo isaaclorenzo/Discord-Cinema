@@ -27,6 +27,13 @@ describe('relay', () => {
     expect(bad.status).toBe(401)
   })
 
+  it('responde a la sonda solo con un token válido', async () => {
+    const ping = (token: string) =>
+      handleRelay(new Request('http://localhost/api/relay', { headers: { 'x-relay-ping': '1', 'x-harness-token': token } }), { env: { HARNESS_ACCESS_TOKEN: 'secreto' } })
+    expect((await ping('secreto')).status).toBe(200)
+    expect((await ping('nope')).status).toBe(401)
+  })
+
   it('rechaza destinos internos (SSRF)', async () => {
     const opts = { env: { HARNESS_ACCESS_TOKEN: 't' } }
     const h = { 'x-harness-token': 't' }

@@ -7,7 +7,8 @@ import { useSettings } from './state/settings'
 import { useUi } from './state/ui'
 import { Background } from './ui/Background'
 import { CommandPalette } from './ui/CommandPalette'
-import { Sidebar } from './ui/Sidebar'
+import { Rail } from './ui/Rail'
+import { SessionsPanel, Sidebar } from './ui/Sidebar'
 import { Toasts } from './ui/Toasts'
 import { ChatView } from './ui/chat/ChatView'
 import { cx } from './ui/cx'
@@ -63,6 +64,7 @@ export default function App() {
   const mobilePanel = useUi((s) => s.mobilePanel)
   const setMobilePanel = useUi((s) => s.setMobilePanel)
   const rightPanel = useSettings((s) => s.ui.rightPanel)
+  const historyOpen = useSettings((s) => s.ui.sidebar)
   const currentId = useSessions((s) => s.currentId)
   const desktop = useMediaQuery('(min-width: 1024px)')
   const relayUrl = useSettings((s) => s.relayUrl)
@@ -84,22 +86,27 @@ export default function App() {
 
   const showRight = view === 'chat' && !!currentId
   return (
-    <div className="flex h-full">
+    <div className="h-full lg:p-3">
       <Background />
-      {/* Barra lateral: fija en escritorio, cajón en móvil */}
-      <aside className="glass hidden w-64 shrink-0 border-y-0 border-l-0 lg:block" style={{ borderRadius: 0 }}>
-        <Sidebar />
-      </aside>
+      {/* Ventana de la app: marco redondeado en escritorio, pantalla completa en móvil */}
+      <div className="app-frame relative flex h-full overflow-hidden lg:rounded-[2.25rem] lg:border lg:border-white/[0.08] lg:shadow-[0_40px_120px_-40px_rgba(0,0,0,0.9)]">
+        {desktop && <Rail />}
+        {desktop && historyOpen && (
+          <aside className="glass w-64 shrink-0 border-y-0 border-l-0 animate-fade-in" style={{ borderRadius: 0 }}>
+            <SessionsPanel />
+          </aside>
+        )}
 
-      <main className="min-w-0 flex-1">
-        <MainView />
-      </main>
+        <main className="min-w-0 flex-1">
+          <MainView />
+        </main>
 
-      {showRight && desktop && rightPanel && (
-        <aside className="glass hidden w-[min(34rem,40vw)] shrink-0 border-y-0 border-r-0 lg:block" style={{ borderRadius: 0 }}>
-          <RightPanel sessionId={currentId!} onClose={() => useSettings.getState().setUi({ rightPanel: false })} />
-        </aside>
-      )}
+        {showRight && desktop && rightPanel && (
+          <aside className="glass w-[min(34rem,38vw)] shrink-0 border-y-0 border-r-0" style={{ borderRadius: 0 }}>
+            <RightPanel sessionId={currentId!} onClose={() => useSettings.getState().setUi({ rightPanel: false })} />
+          </aside>
+        )}
+      </div>
 
       {!desktop && mobilePanel !== 'none' && (
         <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setMobilePanel('none')}>

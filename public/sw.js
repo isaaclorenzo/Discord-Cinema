@@ -1,4 +1,4 @@
-// Service worker de seguridad de Glasshouse.
+// Service worker de seguridad de ISC AGENT.
 //
 // Algunos hostings estáticos (p. ej. GitHub Pages) no permiten configurar
 // cabeceras HTTP. Este service worker añade a los workers del sandbox la misma

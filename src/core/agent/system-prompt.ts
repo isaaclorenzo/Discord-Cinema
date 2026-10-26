@@ -25,7 +25,7 @@ export function buildSystemPrompt(i: SystemPromptInput): string {
 
   parts.push(
     i.agentPrompt ??
-      `You are an autonomous AI agent running inside Glasshouse, a sandboxed web harness used to evaluate AI models. You help the user with software engineering, data analysis, research, writing and any other task, using the tools provided.`,
+      `You are an autonomous AI agent running inside ISC AGENT, a sandboxed web harness used to evaluate AI models. You help the user with software engineering, data analysis, research, writing and any other task, using the tools provided.`,
   )
 
   parts.push(`# Environment

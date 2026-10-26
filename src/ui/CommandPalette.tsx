@@ -154,7 +154,7 @@ export function CommandPalette() {
               onClick={a.run}
               className={cx('flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[13px]', i === active ? 'bg-white/10' : 'hover:bg-white/5')}
             >
-              <span className="text-violet-200">{a.icon}</span>
+              <span className="text-sky-200">{a.icon}</span>
               <span className="truncate">{a.label}</span>
               {a.hint && <span className="ml-auto truncate pl-3 text-xs text-faint">{a.hint}</span>}
             </button>

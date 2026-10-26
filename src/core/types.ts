@@ -1,4 +1,4 @@
-// Tipos compartidos del núcleo de Glasshouse (independientes de React).
+// Tipos compartidos del núcleo de ISC AGENT (independientes de React).
 
 export type JsonSchema = Record<string, unknown>
 

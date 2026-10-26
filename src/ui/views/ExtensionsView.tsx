@@ -574,7 +574,7 @@ export function ExtensionsView() {
                     )}
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
-                    <IconBtn label="Exportar como JSON" onClick={() => downloadText(`${p.name}.glasshouse-plugin.json`, exportBundle(p), 'application/json')}>
+                    <IconBtn label="Exportar como JSON" onClick={() => downloadText(`${p.name}.isc-agent-plugin.json`, exportBundle(p), 'application/json')}>
                       <Download size={14} />
                     </IconBtn>
                     {p.source === 'user' && (

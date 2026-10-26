@@ -1,4 +1,4 @@
-// Worker de JavaScript de Glasshouse.
+// Worker de JavaScript de ISC AGENT.
 //
 // Ejecuta código del modelo o de plugins sin acceso a red: se sirve con
 // CSP connect-src 'none' y además aquí se anulan fetch, XHR, WebSocket, etc.

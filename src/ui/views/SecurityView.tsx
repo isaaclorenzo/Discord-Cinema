@@ -137,7 +137,7 @@ function RelaySection({ relayToken }: { relayToken: string }) {
     >
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="URL del relay" hint={`Vacío = ${defaultRelayUrl()}`}>
-          <input className="input font-mono text-xs" value={relayUrl} onChange={(e) => useSettings.getState().set({ relayUrl: e.target.value.trim() })} placeholder="https://mi-glasshouse.vercel.app/api/relay" />
+          <input className="input font-mono text-xs" value={relayUrl} onChange={(e) => useSettings.getState().set({ relayUrl: e.target.value.trim() })} placeholder="https://mi-isc-agent.vercel.app/api/relay" />
         </Field>
         <Field label="Token del relay">
           <input className="input font-mono text-xs" type="password" value={relayToken} onChange={(e) => useSecrets.getState().setKey('relay', e.target.value.trim())} placeholder="El mismo valor que HARNESS_ACCESS_TOKEN" />
@@ -173,7 +173,7 @@ export function SecurityView() {
 
   return (
     <PageShell>
-      <PageHeader icon={<ShieldCheck size={18} />} title="Seguridad y privacidad" subtitle="Cómo protege Glasshouse tus datos frente a modelos y proveedores en los que no confías." />
+      <PageHeader icon={<ShieldCheck size={18} />} title="Seguridad y privacidad" subtitle="Cómo protege ISC AGENT tus datos frente a modelos y proveedores en los que no confías." />
       <div className="space-y-4">
         <Section title="Modelo de amenazas" description="Lo que la harness garantiza y lo que no.">
           <ul className="grid gap-2 text-[13px] text-fg/85 sm:grid-cols-2">
@@ -201,7 +201,7 @@ export function SecurityView() {
               <button
                 key={a.id}
                 onClick={() => setGuard({ action: a.id })}
-                className={cx('rounded-xl border p-3 text-left transition', guard.action === a.id ? 'border-violet-300/50 bg-violet-500/15' : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06]')}
+                className={cx('rounded-xl border p-3 text-left transition', guard.action === a.id ? 'border-sky-300/50 bg-sky-500/15' : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06]')}
               >
                 <div className="text-sm font-medium">{a.label}</div>
                 <div className="mt-0.5 text-[11px] leading-relaxed text-muted">{a.hint}</div>

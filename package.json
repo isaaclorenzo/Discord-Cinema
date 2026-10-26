@@ -1,8 +1,8 @@
 {
-  "name": "glasshouse",
+  "name": "isc-agent",
   "private": true,
   "version": "0.1.0",
-  "description": "Harness web aislada para probar modelos de IA de proveedores en los que no confías.",
+  "description": "ISC AGENT: harness web aislada para probar modelos de IA de proveedores en los que no confías.",
   "type": "module",
   "scripts": {
     "predev": "node scripts/copy-pyodide.mjs",
@@ -24,6 +24,7 @@
     "@codemirror/view": "^6.43.15",
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource-variable/geist-mono": "^5.3.0",
+    "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
     "@mlc-ai/web-llm": "^0.2.86",
     "@modelcontextprotocol/sdk": "^1.32.2",
     "@uiw/react-codemirror": "^4.25.12",

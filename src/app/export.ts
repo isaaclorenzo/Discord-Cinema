@@ -39,5 +39,5 @@ export function exportSessionMarkdown(session: Session, messages: ChatMessage[])
 }
 
 export function exportSessionJson(session: Session, messages: ChatMessage[]): string {
-  return JSON.stringify({ format: 'glasshouse-session', version: 1, session, messages }, null, 2)
+  return JSON.stringify({ format: 'isc-agent-session', version: 1, session, messages }, null, 2)
 }

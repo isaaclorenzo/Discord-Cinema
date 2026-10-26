@@ -82,7 +82,7 @@ export class Workspace {
         USER: 'sandbox',
         LANG: 'C.UTF-8',
         PATH: '/usr/local/bin:/usr/bin:/bin',
-        GLASSHOUSE: '1',
+        ISC_AGENT: '1',
       },
       customCommands: custom,
       executionLimits: { maxCommandCount: 200_000 },

@@ -34,7 +34,7 @@ function PermissionCard({ it }: { it: Extract<Interaction, { kind: 'permission' 
   return (
     <div className={cx('glass-strong rounded-2xl p-4 animate-fade-in', network && 'border-amber-300/30')}>
       <div className="flex items-center gap-2 text-sm font-medium">
-        {network ? <Globe size={16} className="text-amber" /> : req.tool.name === 'Bash' ? <SquareTerminal size={16} className="text-violet-200" /> : <Wrench size={16} className="text-violet-200" />}
+        {network ? <Globe size={16} className="text-amber" /> : req.tool.name === 'Bash' ? <SquareTerminal size={16} className="text-sky-200" /> : <Wrench size={16} className="text-sky-200" />}
         {network ? 'El modelo quiere usar la red' : 'Permiso para usar una herramienta'}
         <span className="chip">{req.tool.name}</span>
         {req.label && <span className="chip">{req.label}</span>}
@@ -87,7 +87,7 @@ function QuestionBlock({ q, value, onChange }: { q: Question; value: string[]; o
             key={o.label}
             type="button"
             onClick={() => toggle(o.label)}
-            className={cx('rounded-xl border px-3 py-2 text-left transition', value.includes(o.label) ? 'border-violet-300/50 bg-violet-500/15' : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.07]')}
+            className={cx('rounded-xl border px-3 py-2 text-left transition', value.includes(o.label) ? 'border-sky-300/50 bg-sky-500/15' : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.07]')}
           >
             <div className="text-[13px] font-medium">{o.label}</div>
             {o.description && <div className="text-xs text-muted">{o.description}</div>}
@@ -135,7 +135,7 @@ function PlanCard({ it }: { it: Extract<Interaction, { kind: 'plan' }> }) {
   return (
     <div className="glass-strong rounded-2xl p-4 animate-fade-in">
       <div className="flex items-center gap-2 text-sm font-medium">
-        <ClipboardList size={16} className="text-violet-200" /> Plan propuesto
+        <ClipboardList size={16} className="text-sky-200" /> Plan propuesto
       </div>
       <div className="glass-inset mt-3 max-h-80 overflow-y-auto rounded-xl p-4">
         <Markdown text={it.plan} />

@@ -33,6 +33,8 @@ export interface SettingsState {
   /** URL del relay ('' = /api/relay del propio despliegue). */
   relayUrl: string
   ui: { rightPanel: boolean; rightTab: RightTab; sidebar: boolean }
+  /** Solo para el saludo de la interfaz; nunca se envía al modelo. */
+  userName: string
   onboarded: boolean
 
   set: (patch: Partial<SettingsState>) => void
@@ -70,7 +72,8 @@ export const useSettings = create<SettingsState>()(
       disabledTools: [],
       helperModel: '',
       relayUrl: '',
-      ui: { rightPanel: true, rightTab: 'files', sidebar: true },
+      ui: { rightPanel: false, rightTab: 'files', sidebar: false },
+      userName: '',
       onboarded: false,
 
       set: (patch) => set(patch),

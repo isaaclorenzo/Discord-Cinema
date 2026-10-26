@@ -5,7 +5,8 @@
 //    commands/, agents/, hooks/hooks.json y .mcp.json. También marketplaces
 //    (.claude-plugin/marketplace.json) con varios plugins.
 // 2. Carpetas o zips con uno o varios SKILL.md sueltos.
-// 3. Bundle JSON propio de Glasshouse ({ "format": "glasshouse-plugin", … }),
+// 3. Bundle JSON propio de ISC AGENT ({ "format": "isc-agent-plugin", … }; también
+//    se acepta el nombre anterior "glasshouse-plugin"),
 //    que además admite herramientas JS ("tools") y suites de evaluación.
 
 import { unzipSync } from 'fflate'
@@ -315,7 +316,7 @@ export function parseClaudePlugin(files: FileMap, fallbackName = 'plugin'): Plug
   return p
 }
 
-/** Bundle JSON de Glasshouse. */
+/** Bundle JSON de ISC AGENT. */
 export function parseBundle(json: Record<string, unknown>): Plugin {
   const name = slugify(String(json.name ?? 'plugin'))
   const p = emptyPlugin(name, 'user')
@@ -403,7 +404,7 @@ export function pluginsFromFiles(files: FileMap, fallbackName: string): Plugin[]
   if (roots.length) return roots.map((r) => parseClaudePlugin(subtree(files, r), r.split('/').pop() || fallbackName))
 
   // Bundle JSON dentro del zip
-  const bundle = Object.entries(files).find(([p, c]) => p.endsWith('.json') && c.includes('"glasshouse-plugin"'))
+  const bundle = Object.entries(files).find(([p, c]) => p.endsWith('.json') && /"(isc-agent|glasshouse)-plugin"/.test(c))
   if (bundle) {
     try {
       return [parseBundle(JSON.parse(bundle[1]))]
@@ -466,15 +467,15 @@ export async function importFromUrl(url: string): Promise<{ plugins: Plugin[]; s
 
 export function parseBundleOrManifest(text: string): Plugin {
   const json = JSON.parse(text) as Record<string, unknown>
-  if (json.format === 'glasshouse-plugin') return parseBundle(json)
+  if (json.format === 'isc-agent-plugin' || json.format === 'glasshouse-plugin') return parseBundle(json)
   return parseClaudePlugin({ '.claude-plugin/plugin.json': text }, String(json.name ?? 'plugin'))
 }
 
-/** Exporta un plugin como bundle JSON de Glasshouse. */
+/** Exporta un plugin como bundle JSON de ISC AGENT. */
 export function exportBundle(p: Plugin): string {
   return JSON.stringify(
     {
-      format: 'glasshouse-plugin',
+      format: 'isc-agent-plugin',
       name: p.name,
       version: p.version,
       description: p.description,

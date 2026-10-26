@@ -58,13 +58,13 @@ export function SettingsView() {
       // Las instantáneas del workspace contienen binarios: se exportan como base64 vía JSON.
       data[k] = v
     }
-    downloadText(`glasshouse-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ format: 'glasshouse-backup', version: 1, data }, (_k, v) => (v instanceof Uint8Array ? { __u8: Array.from(v) } : v)), 'application/json')
+    downloadText(`isc-agent-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ format: 'isc-agent-backup', version: 1, data }, (_k, v) => (v instanceof Uint8Array ? { __u8: Array.from(v) } : v)), 'application/json')
   }
 
   const importAll = async (file: File) => {
     try {
       const parsed = JSON.parse(await file.text(), (_k, v) => (v && typeof v === 'object' && Array.isArray(v.__u8) ? new Uint8Array(v.__u8) : v)) as { format?: string; data?: Record<string, unknown> }
-      if (parsed.format !== 'glasshouse-backup' || !parsed.data) throw new Error('No es una copia de Glasshouse')
+      if ((parsed.format !== 'isc-agent-backup' && parsed.format !== 'glasshouse-backup') || !parsed.data) throw new Error('No es una copia de ISC AGENT')
       for (const [k, v] of Object.entries(parsed.data)) await dbSet(k, v)
       useUi.getState().toast('Copia importada. Recargando…', 'success')
       setTimeout(() => location.reload(), 800)
@@ -77,6 +77,11 @@ export function SettingsView() {
     <PageShell>
       <PageHeader icon={<Settings size={18} />} title="Ajustes" subtitle="Comportamiento del agente, permisos, herramientas y datos." />
       <div className="space-y-4">
+        <Section title="Perfil" description="Solo se usa en la interfaz (saludo y avatar). Se guarda en este navegador y nunca se envía a ningún modelo.">
+          <Field label="Tu nombre (opcional)">
+            <input className="input max-w-sm" value={s.userName} maxLength={40} placeholder="Por ejemplo: Isaac" onChange={(e) => s.set({ userName: e.target.value })} />
+          </Field>
+        </Section>
         <Section title="Modelo y generación" description="Valores por defecto para todas las conversaciones. Cada conversación puede cambiar de modelo desde el compositor.">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Modelo por defecto">
@@ -94,7 +99,7 @@ export function SettingsView() {
             </Field>
             <Field label={`Temperatura${s.params.temperature === undefined ? ' (por defecto)' : `: ${s.params.temperature}`}`} hint="Solo proveedores compatibles con OpenAI (la API de Anthropic ya no la admite).">
               <div className="flex items-center gap-2">
-                <input type="range" min={0} max={2} step={0.05} className="w-full accent-violet-400" value={s.params.temperature ?? 1} onChange={(e) => s.setParams({ temperature: Number(e.target.value) })} />
+                <input type="range" min={0} max={2} step={0.05} className="w-full accent-sky-400" value={s.params.temperature ?? 1} onChange={(e) => s.setParams({ temperature: Number(e.target.value) })} />
                 <button className="btn px-2 py-1 text-xs" onClick={() => s.setParams({ temperature: undefined })}>
                   Auto
                 </button>
@@ -102,7 +107,7 @@ export function SettingsView() {
             </Field>
             <Field label={`Top P${s.params.topP === undefined ? ' (por defecto)' : `: ${s.params.topP}`}`}>
               <div className="flex items-center gap-2">
-                <input type="range" min={0} max={1} step={0.01} className="w-full accent-violet-400" value={s.params.topP ?? 1} onChange={(e) => s.setParams({ topP: Number(e.target.value) })} />
+                <input type="range" min={0} max={1} step={0.01} className="w-full accent-sky-400" value={s.params.topP ?? 1} onChange={(e) => s.setParams({ topP: Number(e.target.value) })} />
                 <button className="btn px-2 py-1 text-xs" onClick={() => s.setParams({ topP: undefined })}>
                   Auto
                 </button>

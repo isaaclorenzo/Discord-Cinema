@@ -31,7 +31,7 @@ export function VaultUnlock() {
       onClose={() => setDismissed(true)}
       title={
         <span className="flex items-center gap-2">
-          <Lock size={16} className="text-violet-200" /> Desbloquear tus claves
+          <Lock size={16} className="text-sky-200" /> Desbloquear tus claves
         </span>
       }
       footer={

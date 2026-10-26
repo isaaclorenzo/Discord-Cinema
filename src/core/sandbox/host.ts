@@ -30,7 +30,7 @@ export function registerSandboxServiceWorker(): void {
         })
       }
     } catch (e) {
-      console.warn('[glasshouse] no se pudo registrar el service worker de seguridad', e)
+      console.warn('[isc-agent] no se pudo registrar el service worker de seguridad', e)
     }
   })()
 }

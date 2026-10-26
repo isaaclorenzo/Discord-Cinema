@@ -156,7 +156,7 @@ function DisplayBody({ display, result }: { display: ToolDisplay; result?: ChatM
           {Boolean(display.stdout || display.stderr || display.result) && (
             <Pre tone={display.ok ? undefined : 'error'}>
               {String(display.stdout ?? '')}
-              {display.result !== undefined && display.result !== null && <span className="text-violet-200">{`→ ${display.result}\n`}</span>}
+              {display.result !== undefined && display.result !== null && <span className="text-sky-200">{`→ ${display.result}\n`}</span>}
               {String(display.stderr ?? '')}
             </Pre>
           )}
@@ -247,7 +247,7 @@ export function ToolCard({ call, result }: { call: ToolCall; result?: ChatMessag
     <div className={cx('glass-inset overflow-hidden rounded-2xl', guardBlocked && 'border-amber-300/30')}>
       <button className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-white/[0.03]" onClick={() => setOpen(!expanded)} aria-expanded={expanded}>
         <ChevronRight size={13} className={cx('shrink-0 text-faint transition', expanded && 'rotate-90')} />
-        <span className={cx('shrink-0', isErr ? 'text-rose-300' : 'text-violet-200')}>{guardBlocked ? <ShieldAlert size={14} className="text-amber" /> : (ICONS[call.name] ?? <Wrench size={14} />)}</span>
+        <span className={cx('shrink-0', isErr ? 'text-rose-300' : 'text-sky-200')}>{guardBlocked ? <ShieldAlert size={14} className="text-amber" /> : (ICONS[call.name] ?? <Wrench size={14} />)}</span>
         <span className="shrink-0 text-[13px] font-medium">{call.name.startsWith('mcp__') ? call.name.split('__').slice(1).join(' · ') : call.name}</span>
         <span className="min-w-0 flex-1 truncate font-mono text-[11.5px] text-muted">{summary}</span>
         {result?.display?.kind === 'diff' && (

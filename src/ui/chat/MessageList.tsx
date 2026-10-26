@@ -1,4 +1,4 @@
-import { Brain, Check, ChevronRight, Copy, Info, Layers, Pencil, RotateCcw, ShieldAlert, Sparkles, TriangleAlert } from 'lucide-react'
+import { Brain, Check, ChevronRight, Copy, Info, Layers, Pencil, RotateCcw, ShieldAlert, TriangleAlert } from 'lucide-react'
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { editAndResend, regenerate, retryAfterGuard } from '../../app/runtime'
 import { maskValue } from '../../core/security/guard'
@@ -18,11 +18,11 @@ function Reasoning({ text, live }: { text: string; live: boolean }) {
     <div className="mb-2">
       <button className="flex items-center gap-1.5 text-xs text-muted hover:text-fg" onClick={() => setOpen(!open)} aria-expanded={open}>
         <ChevronRight size={12} className={cx('transition', open && 'rotate-90')} />
-        <Brain size={13} className={cx(live && 'animate-pulse-soft text-violet-300')} />
+        <Brain size={13} className={cx(live && 'animate-pulse-soft text-sky-300')} />
         {live ? 'Razonando…' : 'Razonamiento'}
         <span className="text-faint">· {text.length.toLocaleString('es')} car.</span>
       </button>
-      {open && <div className="mt-2 whitespace-pre-wrap border-l-2 border-violet-300/30 pl-3 text-[13px] leading-relaxed text-muted animate-fade-in">{text}</div>}
+      {open && <div className="mt-2 whitespace-pre-wrap border-l-2 border-sky-300/30 pl-3 text-[13px] leading-relaxed text-muted animate-fade-in">{text}</div>}
     </div>
   )
 }
@@ -163,8 +163,8 @@ function UserBubble({ m, sessionId, canEdit }: { m: ChatMessage; sessionId: stri
           ))}
         </div>
       ) : null}
-      <div className="rounded-2xl rounded-br-md border border-violet-300/20 bg-gradient-to-br from-violet-500/20 to-cyan-500/10 px-4 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap break-words shadow-[0_10px_30px_-18px_rgba(139,92,246,0.8)]">
-        {m.meta?.expandedFrom ? <span className="chip mb-1.5 border-violet-300/30 text-violet-100">{m.meta.expandedFrom.split(' ')[0]}</span> : null}
+      <div className="rounded-3xl rounded-br-lg border border-sky-300/20 bg-[#1d8cf0]/[0.18] px-4 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap break-words shadow-[0_12px_30px_-18px_rgba(29,140,240,0.9)]">
+        {m.meta?.expandedFrom ? <span className="chip mb-1.5 border-sky-300/30 text-sky-100">{m.meta.expandedFrom.split(' ')[0]}</span> : null}
         {m.meta?.expandedFrom ? <div className="line-clamp-4 text-fg/90">{m.content}</div> : m.content}
       </div>
       {canEdit && (
@@ -246,9 +246,7 @@ const Item = memo(function Item({ m, results, sessionId, isLastAssistant, isLast
   const empty = !m.content && !m.reasoning && !m.toolCalls?.length
   return (
     <div className={cx('group flex gap-3', m.archived && 'opacity-45')}>
-      <div className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-xl border border-white/10 bg-gradient-to-br from-violet-500/25 to-cyan-400/15">
-        <Sparkles size={14} className="text-violet-100" />
-      </div>
+      <span className={cx('orb orb-sm mt-0.5 size-7 shrink-0', live && 'animate-pulse-soft')} aria-hidden />
       <div className="min-w-0 flex-1">
         {m.reasoning && <Reasoning text={m.reasoning} live={live && !m.content && !m.toolCalls?.length} />}
         {empty && live && (

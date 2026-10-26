@@ -1,4 +1,4 @@
-# Despliega Glasshouse en GitHub Pages.
+# Despliega ISC AGENT en GitHub Pages.
 # Requisito (una sola vez): Settings → Pages → Build and deployment → Source: «GitHub Actions».
 name: Desplegar en GitHub Pages
 

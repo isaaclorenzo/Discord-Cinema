@@ -113,7 +113,7 @@ export const PRESETS: ProviderPreset[] = [
     connection: 'direct',
     keyUrl: 'https://openrouter.ai/settings/keys',
     note: 'Da acceso a casi todos los proveedores con una sola clave. Admite llamadas directas desde el navegador.',
-    headers: { 'X-Title': 'Glasshouse' },
+    headers: { 'X-Title': 'ISC AGENT' },
     models: [],
   },
   {

@@ -1,4 +1,4 @@
-// Relay endurecido de Glasshouse.
+// Relay endurecido de ISC AGENT.
 //
 // Reenvía peticiones del navegador a proveedores que no permiten CORS, a
 // WebFetch/WebSearch y a servidores MCP. Se usa desde la función de Vercel
@@ -199,6 +199,7 @@ const CORS_ALLOWED_HEADERS = new Set([
   'x-harness-token',
   'x-relay-follow',
   'x-relay-max-bytes',
+  'x-relay-ping',
 ])
 
 /**
@@ -251,6 +252,9 @@ async function relay(request: Request, opts: RelayOptions): Promise<Response> {
     if (!safeEqual(given, token)) return json(401, { error: 'Token del relay inválido o ausente' })
   }
 
+  // Sonda de la app para saber si hay relay (y si el token vale) sin generar un error.
+  if (request.headers.get('x-relay-ping') && !request.headers.get('x-relay-url')) return json(200, { ok: true })
+
   const allowList = (env.RELAY_ALLOWED_HOSTS ?? '').split(',').filter((s) => s.trim() !== '')
   const allowPrivate = !!opts.dev && env.RELAY_ALLOW_PRIVATE === '1'
   const target = validateTarget(request.headers.get('x-relay-url'), allowList)
@@ -262,7 +266,7 @@ async function relay(request: Request, opts: RelayOptions): Promise<Response> {
     return json(403, { error: `Dirección bloqueada por el relay (SSRF): ${target.hostname}` })
   }
 
-  const headers: Record<string, string> = { 'user-agent': 'Glasshouse-Relay/1.0' }
+  const headers: Record<string, string> = { 'user-agent': 'ISC-Agent-Relay/1.0' }
   request.headers.forEach((value, key) => {
     const k = key.toLowerCase()
     if (FORWARD_REQUEST_HEADERS.has(k)) headers[k] = value

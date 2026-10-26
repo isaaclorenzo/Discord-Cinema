@@ -9,7 +9,7 @@ export function Toggle({ checked, onChange, label, hint, disabled }: { checked: 
     <label htmlFor={id} className={cx('flex items-start gap-3', disabled ? 'opacity-50' : 'cursor-pointer')}>
       <span className="relative mt-0.5 inline-flex shrink-0">
         <input id={id} type="checkbox" className="peer sr-only" checked={checked} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
-        <span className="h-5 w-9 rounded-full border border-white/15 bg-white/10 transition peer-checked:border-violet-300/40 peer-checked:bg-violet-500/60 peer-focus-visible:ring-2 peer-focus-visible:ring-violet-400/60" />
+        <span className="h-5 w-9 rounded-full border border-white/15 bg-white/10 transition peer-checked:border-sky-300/40 peer-checked:bg-sky-500/60 peer-focus-visible:ring-2 peer-focus-visible:ring-sky-400/60" />
         <span className="absolute left-0.5 top-0.5 size-4 rounded-full bg-white/80 shadow transition peer-checked:translate-x-4 peer-checked:bg-white" />
       </span>
       {(label || hint) && (
@@ -102,7 +102,7 @@ export function Empty({ icon, title, children }: { icon?: ReactNode; title: Reac
 export function Spinner({ size = 14 }: { size?: number }) {
   return (
     <span
-      className="inline-block shrink-0 animate-spin rounded-full border-2 border-white/20 border-t-violet-300"
+      className="inline-block shrink-0 animate-spin rounded-full border-2 border-white/20 border-t-sky-300"
       style={{ width: size, height: size }}
       aria-label="Cargando"
     />
@@ -116,7 +116,7 @@ export function PageHeader({ title, subtitle, icon, actions }: { title: ReactNod
         <button className="btn btn-ghost btn-icon lg:hidden" onClick={() => useUi.getState().setMobilePanel('sidebar')} aria-label="Abrir menú">
           <Menu size={17} />
         </button>
-        {icon && <div className="glass grid size-10 shrink-0 place-items-center rounded-2xl text-violet-200">{icon}</div>}
+        {icon && <div className="glass grid size-10 shrink-0 place-items-center rounded-2xl text-sky-200">{icon}</div>}
         <div className="min-w-0">
           <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
           {subtitle && <p className="mt-0.5 text-sm text-muted">{subtitle}</p>}

@@ -31,7 +31,7 @@ function Entry({ e }: { e: NetEntry }) {
     <div className="border-b border-white/[0.05]">
       <button className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-white/[0.03]" onClick={() => setOpen(!open)}>
         <ChevronRight size={12} className={cx('shrink-0 text-faint transition', open && 'rotate-90')} />
-        {e.blocked ? <Ban size={13} className="shrink-0 text-amber" /> : <ArrowUpRight size={13} className="shrink-0 text-violet-200" />}
+        {e.blocked ? <Ban size={13} className="shrink-0 text-amber" /> : <ArrowUpRight size={13} className="shrink-0 text-sky-200" />}
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[12.5px]">{e.label}</span>
           <span className="block truncate font-mono text-[10.5px] text-faint">

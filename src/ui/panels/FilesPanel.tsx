@@ -35,7 +35,7 @@ function TreeNode({ ws, entry, depth, version, selected, onSelect }: { ws: Works
       <button
         style={pad}
         onClick={() => onSelect(entry.path)}
-        className={cx('flex w-full items-center gap-1.5 rounded-lg py-1 pr-2 text-left text-[12.5px] hover:bg-white/6', selected === entry.path ? 'bg-violet-500/15 text-fg' : 'text-fg/80')}
+        className={cx('flex w-full items-center gap-1.5 rounded-lg py-1 pr-2 text-left text-[12.5px] hover:bg-white/6', selected === entry.path ? 'bg-sky-500/15 text-fg' : 'text-fg/80')}
       >
         <File size={13} className="shrink-0 text-faint" />
         <span className="truncate">{entry.name}</span>
@@ -47,7 +47,7 @@ function TreeNode({ ws, entry, depth, version, selected, onSelect }: { ws: Works
     <div>
       <button style={pad} onClick={() => setOpen(!open)} className="flex w-full items-center gap-1.5 rounded-lg py-1 pr-2 text-left text-[12.5px] text-fg/85 hover:bg-white/6">
         <ChevronRight size={12} className={cx('shrink-0 text-faint transition', open && 'rotate-90')} />
-        {open ? <FolderOpen size={13} className="shrink-0 text-violet-200" /> : <Folder size={13} className="shrink-0 text-violet-200" />}
+        {open ? <FolderOpen size={13} className="shrink-0 text-sky-200" /> : <Folder size={13} className="shrink-0 text-sky-200" />}
         <span className="truncate">{entry.name}</span>
       </button>
       {open && children.map((c) => <TreeNode key={c.path} ws={ws} entry={c} depth={depth + 1} version={version} selected={selected} onSelect={onSelect} />)}

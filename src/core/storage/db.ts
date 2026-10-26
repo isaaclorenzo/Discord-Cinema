@@ -56,7 +56,7 @@ export function debouncedSave(key: string, produce: () => unknown | Promise<unkn
       try {
         await dbSet(key, await produce())
       } catch (e) {
-        console.error('[glasshouse] no se pudo guardar', key, e)
+        console.error('[isc-agent] no se pudo guardar', key, e)
       }
     }, ms),
   )
