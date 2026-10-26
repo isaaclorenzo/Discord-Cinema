@@ -40,6 +40,7 @@ export interface SettingsState {
   setGuard: (patch: Partial<GuardConfig>) => void
   setUi: (patch: Partial<SettingsState['ui']>) => void
   addProvider: (presetId: string) => string
+  addProviderConfig: (p: ProviderConfig) => void
   updateProvider: (id: string, patch: Partial<ProviderConfig>) => void
   removeProvider: (id: string) => void
   setModels: (id: string, models: ModelInfo[]) => void
@@ -85,6 +86,7 @@ export const useSettings = create<SettingsState>()(
         set((s) => ({ providers: [...s.providers, provider] }))
         return id
       },
+      addProviderConfig: (p) => set((s) => ({ providers: [...s.providers.filter((x) => x.id !== p.id), p] })),
       updateProvider: (id, patch) => set((s) => ({ providers: s.providers.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
       removeProvider: (id) =>
         set((s) => {
@@ -118,7 +120,7 @@ export const useSettings = create<SettingsState>()(
       storage: createJSONStorage(() => idbStorage),
       partialize: (s) => {
         // Nunca se persisten funciones; las claves viven en la bóveda.
-        const { set: _a, setParams: _b, setGuard: _c, setUi: _d, addProvider: _e, updateProvider: _f, removeProvider: _g, setModels: _h, addRule: _i, removeRule: _j, ...rest } = s
+        const { set: _a, setParams: _b, setGuard: _c, setUi: _d, addProvider: _e, addProviderConfig: _k, updateProvider: _f, removeProvider: _g, setModels: _h, addRule: _i, removeRule: _j, ...rest } = s
         return rest
       },
     },

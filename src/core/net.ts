@@ -11,9 +11,15 @@ export interface NetEnv {
   /** URL del relay (por defecto, /api/relay del propio despliegue). */
   relayUrl: () => string
   guard: () => GuardConfig
+  /** ¿Hay un relay utilizable? (para cambiar de conexión automáticamente) */
+  relayAvailable?: () => boolean
 }
 
 let env: NetEnv = { relayToken: () => '', relayUrl: () => '/api/relay', guard: () => DEFAULT_GUARD }
+
+export function relayAvailable(): boolean {
+  return env.relayAvailable?.() ?? false
+}
 
 export function configureNet(next: NetEnv): void {
   env = next

@@ -21,7 +21,8 @@ import type { ChatMessage, ImagePart, PermissionMode, ToolDisplay } from '../cor
 import { truncate, uid } from '../core/util'
 import { webSearch } from '../core/web/search'
 import { enabledAgents, enabledCommands, enabledHooks, enabledMcpServers, enabledPluginTools, enabledSkills, pluginFiles } from '../state/extensions'
-import { defaultRelayUrl } from '../state/relay'
+import { defaultRelayUrl, relayState } from '../state/relay'
+import { describeFix, setCompatListener } from '../core/providers/compat'
 import { useSecrets } from '../state/secrets'
 import { useSessions } from '../state/sessions'
 import { resolveModel, useSettings } from '../state/settings'
@@ -33,6 +34,24 @@ configureNet({
   relayToken: () => useSecrets.getState().getKey('relay'),
   relayUrl: () => useSettings.getState().relayUrl || defaultRelayUrl(),
   guard: () => useSettings.getState().guard,
+  relayAvailable: () => relayState.status === 'ok',
+})
+
+// Lo que la capa de compatibilidad aprende de un proveedor se guarda en sus
+// ajustes, para no repetir el diagnóstico en la próxima petición.
+setCompatListener((providerId, modelId, quirks, fix) => {
+  const st = useSettings.getState()
+  const provider = st.providers.find((p) => p.id === providerId)
+  if (!provider) return
+  if (modelId === '*') {
+    st.updateProvider(providerId, { quirks, ...(fix.connection ? { connection: fix.connection } : {}) })
+  } else {
+    const exists = provider.models.some((m) => m.id === modelId)
+    st.updateProvider(providerId, {
+      models: exists ? provider.models.map((m) => (m.id === modelId ? { ...m, quirks, ...(fix.promptTools ? { toolMode: 'prompt' as const } : {}) } : m)) : provider.models,
+    })
+  }
+  useUi.getState().toast(`${provider.name}: ${describeFix(fix)}. Ajustado automáticamente.`, 'info')
 })
 
 const controllers = new Map<string, AbortController>()

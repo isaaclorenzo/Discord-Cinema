@@ -1,4 +1,5 @@
 import type { ChatMessage, JsonSchema, RawProviderContent, ToolCall, Usage } from '../types'
+import type { ProviderQuirks } from './compat'
 
 export type ProviderKind = 'openai' | 'anthropic' | 'mock' | 'webllm'
 
@@ -18,6 +19,8 @@ export interface ModelInfo {
   compactTools?: boolean
   /** Tamaño aproximado de descarga/VRAM (MB), para modelos locales. */
   sizeMB?: number
+  /** Ajustes de compatibilidad aprendidos automáticamente para este modelo. */
+  quirks?: ProviderQuirks
 }
 
 export interface ProviderConfig {
@@ -36,6 +39,8 @@ export interface ProviderConfig {
   refusalFallback?: boolean
   /** Nota visible (p. ej. jurisdicción / política de datos del proveedor). */
   note?: string
+  /** Ajustes de compatibilidad aprendidos para todo el proveedor. */
+  quirks?: ProviderQuirks
 }
 
 export interface GenParams {

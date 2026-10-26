@@ -1,5 +1,8 @@
-import { Check, ChevronDown, Download, ExternalLink, KeyRound, Plus, Server, Trash2, TriangleAlert, Zap } from 'lucide-react'
-import { useState } from 'react'
+import { Check, ChevronDown, Download, ExternalLink, KeyRound, Plus, RotateCcw, Search, Server, Trash2, TriangleAlert, Wand2, Zap } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { detectProvider } from '../../core/providers/detect'
+import { describeFix, forgetQuirks, type ProviderQuirks } from '../../core/providers/compat'
+import { safeJsonParse } from '../../core/util'
 import { getAdapter } from '../../core/providers'
 import { PRESETS } from '../../core/providers/presets'
 import type { ModelInfo, ProviderConfig } from '../../core/providers/types'
@@ -8,7 +11,6 @@ import { useSecrets } from '../../state/secrets'
 import { useSettings } from '../../state/settings'
 import { useRelay } from '../../state/relay'
 import { deleteLocalModel, isLocalModelCached, preloadLocalModel, useWebGpu, useWebLlm } from '../../core/providers/webllm'
-import { useEffect } from 'react'
 import { useUi } from '../../state/ui'
 import { cx } from '../cx'
 import { Field, Modal, PageHeader, PageShell, Spinner, Toggle } from '../primitives'
@@ -271,6 +273,7 @@ function ProviderCard({ p }: { p: ProviderConfig }) {
           </div>
         </div>
       )}
+      {!isMock && <AdvancedSettings p={p} />}
       <div className="mt-5">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">Modelos ({p.models.length})</h3>
@@ -335,6 +338,126 @@ function RelayBanner() {
   )
 }
 
+function DetectProvider({ onDone }: { onDone: () => void }) {
+  const [url, setUrl] = useState('')
+  const [key, setKey] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [notes, setNotes] = useState<string[]>([])
+  const run = async () => {
+    setBusy(true)
+    setNotes([])
+    const id = uid('prov')
+    try {
+      useSecrets.getState().setKey(id, key.trim())
+      const r = await detectProvider(url, key.trim(), id)
+      useSettings.getState().addProviderConfig(r.provider)
+      setNotes(r.notes)
+      useUi.getState().toast(`${r.provider.name} añadido. ${r.notes[0] ?? ''}`, 'success')
+      if (r.provider.models[0]) useSettings.getState().set({ selected: `${r.provider.id}::${r.provider.models[0].id}` })
+      setTimeout(onDone, r.provider.models.length ? 600 : 4000)
+    } catch (e) {
+      useSecrets.getState().setKey(id, '')
+      setNotes([(e as Error).message])
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <div className="rounded-2xl border border-violet-300/25 bg-violet-400/[0.06] p-4">
+      <div className="flex items-center gap-2 text-sm font-medium">
+        <Wand2 size={15} className="text-violet-200" /> Cualquier proveedor: detección automática
+      </div>
+      <p className="mt-1 text-xs leading-relaxed text-muted">
+        Pega la URL de la API (OpenAI-compatible o Anthropic) y tu clave. Glasshouse averigua la ruta, la autenticación, la conexión y los modelos, y se adapta solo a las diferencias de cada proveedor al usarlo.
+      </p>
+      <form
+        className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto]"
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (url.trim()) void run()
+        }}
+      >
+        <input className="input font-mono text-xs" placeholder="https://api.proveedor.com/v1" value={url} onChange={(e) => setUrl(e.target.value)} />
+        <input className="input font-mono text-xs" type="password" autoComplete="off" placeholder="Clave de API (si hace falta)" value={key} onChange={(e) => setKey(e.target.value)} />
+        <button className="btn btn-primary" type="submit" disabled={busy || !url.trim()}>
+          {busy ? <Spinner size={13} /> : <Search size={14} />} Detectar y añadir
+        </button>
+      </form>
+      {notes.length > 0 && (
+        <ul className="mt-2 space-y-0.5 text-xs text-muted">
+          {notes.map((n) => (
+            <li key={n}>• {n}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+function AdvancedSettings({ p }: { p: ProviderConfig }) {
+  const [open, setOpen] = useState(false)
+  const [headers, setHeaders] = useState(() => JSON.stringify(p.headers ?? {}, null, 2))
+  const learned: Array<[string, ProviderQuirks | undefined]> = [['Proveedor', p.quirks], ...p.models.filter((m) => m.quirks).map((m) => [m.id, m.quirks] as [string, ProviderQuirks | undefined])]
+  const lines = learned.flatMap(([who, q]) => {
+    if (!q) return []
+    const out: string[] = []
+    for (const d of q.drop ?? []) out.push(`${who}: ${describeFix({ dropParam: d })}`)
+    if (q.maxTokensParam) out.push(`${who}: ${describeFix({ maxTokensParam: q.maxTokensParam })}`)
+    if (q.noStream) out.push(`${who}: ${describeFix({ noStream: true })}`)
+    if (q.promptTools) out.push(`${who}: ${describeFix({ promptTools: true })}`)
+    if (q.authAll) out.push(`${who}: ${describeFix({ authAll: true })}`)
+    if (q.baseSuffix) out.push(`${who}: ${describeFix({ baseSuffix: q.baseSuffix })}`)
+    return out
+  })
+  return (
+    <div className="mt-4">
+      <button className="flex items-center gap-1.5 text-xs text-muted hover:text-fg" onClick={() => setOpen(!open)}>
+        <ChevronDown size={12} className={cx('transition', !open && '-rotate-90')} /> Avanzado: cabeceras y ajustes aprendidos
+        {lines.length > 0 && <span className="chip">{lines.length}</span>}
+      </button>
+      {open && (
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <Field label="Cabeceras extra (JSON)" hint="Para proveedores que piden cabeceras propias (p. ej. organización, versión de API).">
+            <textarea
+              className="input min-h-24 font-mono text-xs"
+              value={headers}
+              onChange={(e) => setHeaders(e.target.value)}
+              onBlur={() => {
+                const r = safeJsonParse<Record<string, string>>(headers || '{}')
+                if (r.ok && r.value && typeof r.value === 'object') useSettings.getState().updateProvider(p.id, { headers: Object.keys(r.value).length ? r.value : undefined })
+                else useUi.getState().toast('Las cabeceras no son JSON válido', 'error')
+              }}
+            />
+          </Field>
+          <div>
+            <div className="label">Ajustes aprendidos automáticamente</div>
+            {lines.length ? (
+              <ul className="space-y-0.5 text-xs text-muted">
+                {lines.map((l) => (
+                  <li key={l}>• {l}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-faint">Ninguno todavía: se aprenden solos si el proveedor rechaza algo.</p>
+            )}
+            {lines.length > 0 && (
+              <button
+                className="btn mt-2 px-2.5 py-1 text-xs"
+                onClick={() => {
+                  forgetQuirks(p.id)
+                  useSettings.getState().updateProvider(p.id, { quirks: undefined, models: p.models.map((m) => ({ ...m, quirks: undefined })) })
+                }}
+              >
+                <RotateCcw size={12} /> Olvidar ajustes
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function ProvidersView() {
   const providers = useSettings((s) => s.providers)
   const [adding, setAdding] = useState(false)
@@ -357,6 +480,8 @@ export function ProvidersView() {
         ))}
       </div>
       <Modal open={adding} onClose={() => setAdding(false)} title="Añadir proveedor" wide>
+        <DetectProvider onDone={() => setAdding(false)} />
+        <div className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-muted">O elige uno conocido</div>
         <div className="grid gap-2 sm:grid-cols-2">
           {PRESETS.filter((p) => p.id !== 'demo').map((p) => (
             <button
