@@ -2,13 +2,14 @@
 // DeepSeek, Qwen, Kimi, GLM, MiniMax, Grok, Mistral, Groq, Together,
 // Fireworks, OpenRouter, Gemini (endpoint compatible), Ollama, LM Studio…
 
-import { netFetch, relayAvailable } from '../net'
+import { effectiveVia, netFetch, relayAvailable, relayMissing, tunnelEnabled } from '../net'
+import { TunnelError } from '../tunnel'
 import { diagnoseRejection, endpointUrl, isAccountIssue, isTransient, learn, quirksFor, retryDelayMs, type ProviderQuirks, type QuirkFix } from './compat'
 import { withPromptTools } from './prompt-tools'
 import type { ChatMessage, ToolCall } from '../types'
 import { safeJsonParse, sleep } from '../util'
 import { parseSse, ThinkSplitter } from './sse'
-import { ProviderError, type ModelInfo, type ProviderAdapter, type ProviderConfig, type StreamEvent, type StreamRequest } from './types'
+import { ProviderError, type Connection, type ModelInfo, type ProviderAdapter, type ProviderConfig, type StreamEvent, type StreamRequest } from './types'
 
 type OaiContent = string | Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } }>
 
@@ -163,7 +164,10 @@ async function requestWithCompat(
 ): Promise<{ res: Response; q: ProviderQuirks }> {
   const { provider, model } = req
   let q = quirksFor(provider.id, model.id, model.quirks, provider.quirks)
-  let via: 'direct' | 'relay' = q.connection ?? provider.connection
+  // Sin relay, un proveedor configurado «por relay» empieza en directo: el túnel
+  // solo entra si el proveedor bloquea el navegador (menos terceros por medio).
+  const preferred = q.connection ?? provider.connection
+  let via: Connection = preferred === 'relay' && relayMissing() ? 'direct' : effectiveVia(preferred)
   let transient = 0
   const learnFix = (fix: QuirkFix) => {
     q = learn(provider.id, model.id, q, fix)
@@ -213,12 +217,19 @@ async function requestWithCompat(
   }
 }
 
-function connectionFallback(e: unknown, via: 'direct' | 'relay'): 'direct' | 'relay' | null {
+/**
+ * Siguiente conexión a probar tras un fallo de red. Orden: directa → relay
+ * propio (si existe) → túnel cifrado. Un fallo del túnel (servidor caído o
+ * certificado inválido) solo cede al relay propio, nunca a algo menos seguro.
+ */
+function connectionFallback(e: unknown, via: Connection): Connection | null {
   if (!(e instanceof Error) || e.name === 'AbortError' || e.name === 'GuardBlockedError') return null
+  if (e instanceof TunnelError) return via === 'tunnel' && relayAvailable() ? 'relay' : null
   const network = /CORS|Failed to fetch|NetworkError|Load failed|No hay relay|network/i.test(e.message)
   if (!network) return null
-  if (via === 'direct') return relayAvailable() ? 'relay' : null
-  return 'direct'
+  if (via === 'direct') return relayAvailable() ? 'relay' : tunnelEnabled() ? 'tunnel' : null
+  if (via === 'relay') return tunnelEnabled() && !relayAvailable() ? 'tunnel' : 'direct'
+  return null
 }
 
 function* parseCompletionJson(data: { choices?: Array<{ message?: Completion; finish_reason?: string }>; usage?: UsageJson }): Generator<StreamEvent, string> {

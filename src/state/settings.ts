@@ -8,6 +8,7 @@ import { idbStorage } from '../core/storage/db'
 import type { PermissionMode, PermissionRules } from '../core/types'
 import { uid } from '../core/util'
 import { relayState } from './relay'
+import { DEFAULT_TUNNEL_SERVER } from '../core/tunnel'
 
 export type RightTab = 'files' | 'terminal' | 'tasks' | 'network' | 'preview'
 export type SearchBackend = 'duckduckgo' | 'brave' | 'tavily' | 'searxng' | 'exa'
@@ -32,6 +33,8 @@ export interface SettingsState {
   helperModel: string
   /** URL del relay ('' = /api/relay del propio despliegue). */
   relayUrl: string
+  /** Túnel cifrado (TLS en el navegador sobre Wisp) cuando no hay relay. */
+  tunnel: { enabled: boolean; server: string }
   ui: { rightPanel: boolean; rightTab: RightTab; sidebar: boolean }
   /** Solo para el saludo de la interfaz; nunca se envía al modelo. */
   userName: string
@@ -72,6 +75,7 @@ export const useSettings = create<SettingsState>()(
       disabledTools: [],
       helperModel: '',
       relayUrl: '',
+      tunnel: { enabled: true, server: DEFAULT_TUNNEL_SERVER },
       ui: { rightPanel: false, rightTab: 'files', sidebar: false },
       userName: '',
       onboarded: false,
@@ -84,7 +88,8 @@ export const useSettings = create<SettingsState>()(
         const preset = PRESETS.find((p) => p.id === presetId) ?? PRESETS[PRESETS.length - 1]
         const id = get().providers.some((p) => p.id === preset.id) ? uid(preset.id) : preset.id
         const provider = providerFromPreset(preset, id)
-        // Sin relay (p. ej. GitHub Pages) la única opción posible es la conexión directa.
+        // Sin relay (p. ej. GitHub Pages) se empieza en directo; si el proveedor
+        // bloquea el navegador, la capa de compatibilidad pasa sola al túnel cifrado.
         if (relayState.status === 'missing') provider.connection = 'direct'
         set((s) => ({ providers: [...s.providers, provider] }))
         return id

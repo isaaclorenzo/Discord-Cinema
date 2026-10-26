@@ -246,6 +246,7 @@ function McpEditor({ server, onClose }: { server: McpServerDef | null; onClose: 
         <Field label="Conexión">
           <select className="input" value={m.connection} onChange={(e) => setM({ ...m, connection: e.target.value as McpServerDef['connection'] })}>
             <option value="relay">Relay propio</option>
+            <option value="tunnel">Túnel cifrado</option>
             <option value="direct">Directa</option>
           </select>
         </Field>
@@ -695,7 +696,7 @@ export function ExtensionsView() {
                 key={m.id}
                 title={m.name}
                 mono
-                subtitle={`${m.url} · ${m.transport} · ${m.connection === 'relay' ? 'relay' : 'directo'}`}
+                subtitle={`${m.url} · ${m.transport} · ${m.connection === 'relay' ? 'relay' : m.connection === 'tunnel' ? 'túnel' : 'directo'}`}
                 source={m.source}
                 on={isOn(m.id, m.enabled, builtinEnabled)}
                 onToggle={(v) => toggle(m.id, v)}

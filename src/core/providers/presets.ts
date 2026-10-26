@@ -3,14 +3,14 @@
 
 import { MOCK_MODELS } from './mock'
 import { WEBLLM_MODELS } from './webllm'
-import type { ModelInfo, ProviderConfig, ProviderKind } from './types'
+import type { Connection, ModelInfo, ProviderConfig, ProviderKind } from './types'
 
 export interface ProviderPreset {
   id: string
   name: string
   kind: ProviderKind
   baseUrl: string
-  connection: 'direct' | 'relay'
+  connection: Connection
   models: ModelInfo[]
   keyUrl?: string
   note?: string
@@ -121,8 +121,9 @@ export const PRESETS: ProviderPreset[] = [
     name: 'Google Gemini',
     kind: 'openai',
     baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
-    connection: 'relay',
+    connection: 'direct',
     keyUrl: 'https://aistudio.google.com/apikey',
+    note: 'Tiene plan gratuito (clave en Google AI Studio) y admite llamadas directas desde el navegador, también en GitHub Pages.',
     models: [],
   },
   { id: 'openai', name: 'OpenAI', kind: 'openai', baseUrl: 'https://api.openai.com/v1', connection: 'relay', keyUrl: 'https://platform.openai.com/api-keys', models: [] },

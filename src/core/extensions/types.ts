@@ -69,7 +69,7 @@ export interface McpServerDef {
   url: string
   transport: 'http' | 'sse'
   headers?: Record<string, string>
-  connection: 'direct' | 'relay'
+  connection: 'direct' | 'relay' | 'tunnel'
   source: ExtSource
   enabled: boolean
 }

@@ -10,6 +10,8 @@
 // Lo que NO hace: saltarse restricciones de cuenta del proveedor (planes,
 // créditos, verificación). Esos rechazos se informan tal cual, sin reintentos.
 
+import type { Connection } from './types'
+
 export interface ProviderQuirks {
   /** Parámetros opcionales que el proveedor rechaza. */
   drop?: string[]
@@ -23,7 +25,7 @@ export interface ProviderQuirks {
   /** Sufijo de ruta que faltaba en la URL base (p. ej. /v1). */
   baseSuffix?: string
   /** Conexión que funcionó (directa o relay). */
-  connection?: 'direct' | 'relay'
+  connection?: Connection
 }
 
 export type QuirkFix = Partial<ProviderQuirks> & { dropParam?: string }
@@ -150,6 +152,6 @@ export function describeFix(fix: QuirkFix): string {
   if (fix.promptTools) return 'no admite herramientas nativas: se usan herramientas por prompt'
   if (fix.authAll) return 'se probó otra cabecera de autenticación'
   if (fix.baseSuffix) return `faltaba ${fix.baseSuffix} en la URL`
-  if (fix.connection) return `funciona por conexión ${fix.connection === 'relay' ? '«Relay»' : '«Directa»'}`
+  if (fix.connection) return `funciona por conexión ${fix.connection === 'relay' ? '«Relay»' : fix.connection === 'tunnel' ? '«Túnel cifrado»' : '«Directa»'}`
   return 'ajuste aplicado'
 }

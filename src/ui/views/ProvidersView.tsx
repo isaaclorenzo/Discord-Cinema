@@ -257,10 +257,11 @@ function ProviderCard({ p }: { p: ProviderConfig }) {
               <input className="input pl-8 font-mono text-xs" type="password" autoComplete="off" value={key} placeholder={/localhost|127\.0\.0\.1/.test(p.baseUrl) ? 'No suele hacer falta en local' : 'sk-…'} onChange={(e) => useSecrets.getState().setKey(p.id, e.target.value.trim())} />
             </div>
           </Field>
-          <Field label="Conexión" hint="«Relay» pasa por tu propio servidor (/api/relay) para evitar bloqueos CORS. «Directa» va del navegador al proveedor.">
+          <Field label="Conexión" hint="«Directa» va del navegador al proveedor. «Túnel cifrado» evita los bloqueos CORS sin relay: el cifrado TLS se hace en tu navegador. «Relay» usa tu propio servidor (/api/relay). Si una falla, se prueba la siguiente sola.">
             <select className="input" value={p.connection} onChange={(e) => update({ connection: e.target.value as ProviderConfig['connection'] })}>
-              <option value="relay">Relay propio</option>
               <option value="direct">Directa</option>
+              <option value="tunnel">Túnel cifrado</option>
+              <option value="relay">Relay propio</option>
             </select>
           </Field>
           <div className="flex flex-col justify-end gap-2">

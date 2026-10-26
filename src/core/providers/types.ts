@@ -23,13 +23,16 @@ export interface ModelInfo {
   quirks?: ProviderQuirks
 }
 
+/** Cómo sale una petición: directa, por el relay propio o por el túnel cifrado (TLS en el navegador). */
+export type Connection = 'direct' | 'relay' | 'tunnel'
+
 export interface ProviderConfig {
   id: string
   name: string
   kind: ProviderKind
   presetId?: string
   baseUrl: string
-  connection: 'direct' | 'relay'
+  connection: Connection
   headers?: Record<string, string>
   models: ModelInfo[]
   enabled: boolean

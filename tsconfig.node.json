@@ -23,5 +23,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts", "server", "api", "scripts", "tests"]
+  "include": ["vite.config.ts", "server", "api", "scripts", "tests", "src/libcurl.d.ts"]
 }

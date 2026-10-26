@@ -64,7 +64,7 @@ export async function detectProvider(rawUrl: string, apiKey: string, id: string)
     notes.push(`${models.length} modelos encontrados.`)
     if (q.baseSuffix) notes.push(`Se añadió ${q.baseSuffix} a la URL.`)
     if (q.authAll) notes.push('Se usan cabeceras de autenticación alternativas.')
-    if (q.connection) notes.push(`Conexión: ${q.connection === 'relay' ? 'por relay (el proveedor no permite CORS)' : 'directa'}.`)
+    if (q.connection) notes.push(`Conexión: ${q.connection === 'relay' ? 'por relay (el proveedor no permite CORS)' : q.connection === 'tunnel' ? 'por túnel cifrado (el proveedor no permite CORS; tu clave sigue cifrada de extremo a extremo)' : 'directa'}.`)
   } catch (e) {
     const q = quirksFor(id, '__models__')
     provider = { ...provider, connection: q.connection ?? provider.connection, quirks: { authAll: q.authAll, baseSuffix: q.baseSuffix, connection: q.connection } }

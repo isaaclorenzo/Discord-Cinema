@@ -41,7 +41,7 @@ function Entry({ e }: { e: NetEntry }) {
         <span className="flex shrink-0 flex-col items-end gap-0.5 text-[10.5px]">
           <span className={cx('chip', e.blocked ? 'text-amber' : e.error || (e.status ?? 0) >= 400 ? 'text-rose-200' : 'text-ok')}>{status}</span>
           <span className="text-faint">
-            {PURPOSE[e.purpose]} · {e.via === 'relay' ? 'relay' : 'directo'} · {formatBytes(e.requestBytes)}
+            {PURPOSE[e.purpose]} · {e.via === 'relay' ? 'relay' : e.via === 'tunnel' ? 'túnel cifrado' : 'directo'} · {formatBytes(e.requestBytes)}
           </span>
         </span>
       </button>

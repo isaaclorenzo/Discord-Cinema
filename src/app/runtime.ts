@@ -35,6 +35,8 @@ configureNet({
   relayUrl: () => useSettings.getState().relayUrl || defaultRelayUrl(),
   guard: () => useSettings.getState().guard,
   relayAvailable: () => relayState.status === 'ok',
+  relayMissing: () => relayState.status === 'missing' || relayState.status === 'disabled',
+  tunnel: () => useSettings.getState().tunnel,
 })
 
 // Lo que la capa de compatibilidad aprende de un proveedor se guarda en sus

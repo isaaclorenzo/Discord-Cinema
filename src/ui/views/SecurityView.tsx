@@ -1,8 +1,10 @@
-import { KeyRound, Lock, Network, ShieldAlert, ShieldCheck, Trash2, Unlock, X } from 'lucide-react'
+import { Cable, KeyRound, Lock, Network, ShieldAlert, ShieldCheck, Trash2, Unlock, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { DETECTORS, maskValue, redactText, scanText, type GuardAction } from '../../core/security/guard'
 import { useNetlog } from '../../core/security/netlog'
 import { dbClear } from '../../core/storage/db'
+import { netFetch } from '../../core/net'
+import { DEFAULT_TUNNEL_SERVER, normalizeTunnelServer } from '../../core/tunnel'
 import { useSecrets } from '../../state/secrets'
 import { useSettings } from '../../state/settings'
 import { defaultRelayUrl, useRelay } from '../../state/relay'
@@ -132,7 +134,7 @@ function RelaySection({ relayToken }: { relayToken: string }) {
   return (
     <Section
       title="Relay propio"
-      description="El relay reenvía las peticiones a proveedores sin CORS, WebFetch, WebSearch y MCP. En Vercel usa /api/relay con el token de la variable HARNESS_ACCESS_TOKEN; en local (npm run dev) no necesita token. En GitHub Pages no hay relay: usa conexión directa o apunta a un relay desplegado en Vercel (añade el origen de Pages a RELAY_ALLOWED_ORIGINS)."
+      description="El relay reenvía las peticiones a proveedores sin CORS, WebFetch, WebSearch y MCP. En Vercel usa /api/relay con el token de la variable HARNESS_ACCESS_TOKEN; en local (npm run dev) no necesita token. En GitHub Pages no hay relay: se usa el túnel cifrado (arriba) o puedes apuntar a un relay desplegado en Vercel (añade el origen de Pages a RELAY_ALLOWED_ORIGINS)."
       actions={<span className={cx('chip', tone)}>{label}</span>}
     >
       <div className="grid gap-3 sm:grid-cols-2">
@@ -149,6 +151,70 @@ function RelaySection({ relayToken }: { relayToken: string }) {
         </button>
         <span className="text-xs text-muted">{message}</span>
       </div>
+    </Section>
+  )
+}
+
+function TunnelSection() {
+  const tunnel = useSettings((s) => s.tunnel)
+  const relay = useRelay((s) => s.status)
+  const [server, setServer] = useState(tunnel.server)
+  const [error, setError] = useState('')
+  const [test, setTest] = useState<{ ok: boolean; text: string } | null>(null)
+  const [testing, setTesting] = useState(false)
+  const save = (raw: string) => {
+    try {
+      const next = normalizeTunnelServer(raw || DEFAULT_TUNNEL_SERVER)
+      setServer(next)
+      setError('')
+      useSettings.getState().set({ tunnel: { ...tunnel, server: next } })
+    } catch (e) {
+      setError((e as Error).message)
+    }
+  }
+  const run = async () => {
+    setTesting(true)
+    setTest(null)
+    const started = performance.now()
+    try {
+      const res = await netFetch('https://example.com/', { method: 'GET' }, { purpose: 'webfetch', label: 'Prueba del túnel cifrado', via: 'tunnel' })
+      await res.arrayBuffer()
+      setTest({ ok: true, text: `Funciona: TLS verificado con example.com dentro del navegador (HTTP ${res.status}, ${Math.round(performance.now() - started)} ms).` })
+    } catch (e) {
+      setTest({ ok: false, text: (e as Error).message })
+    } finally {
+      setTesting(false)
+    }
+  }
+  return (
+    <Section
+      title="Túnel cifrado"
+      description="Para proveedores que bloquean las llamadas desde el navegador (CORS) cuando no hay relay, como en GitHub Pages. La conexión TLS se negocia dentro de tu navegador (curl en WebAssembly) y se verifica el certificado del proveedor: el servidor del túnel solo reenvía bytes cifrados y no puede leer ni cambiar tu clave, tus mensajes ni las respuestas. Sí ve a qué dominio te conectas y tu IP."
+      actions={<span className={cx('chip', tunnel.enabled ? 'text-ok' : 'text-faint')}>{tunnel.enabled ? (relay === 'ok' ? 'De reserva' : 'Activo') : 'Apagado'}</span>}
+    >
+      <Toggle
+        checked={tunnel.enabled}
+        onChange={(enabled) => useSettings.getState().set({ tunnel: { ...tunnel, enabled } })}
+        label="Usar el túnel cuando un proveedor bloquee el navegador"
+        hint="Se usa solo si la conexión directa falla y no hay relay propio. Cada petición aparece en el inspector como «túnel cifrado»."
+      />
+      <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+        <Field
+          label="Servidor del túnel (Wisp)"
+          hint={
+            <>
+              Por defecto, el servidor público de demostración de Mercury Workshop (creadores del protocolo Wisp): gratuito y limitado a unos 500 KB/s por IP, de sobra para texto, pero sin garantías de disponibilidad. Para uso intensivo o más privacidad, monta el tuyo con wisp-server-python o wisp-server-node.
+              {error && <span className="block text-danger">{error}</span>}
+            </>
+          }
+        >
+          <input className="input font-mono text-xs" value={server} onChange={(e) => setServer(e.target.value)} onBlur={(e) => save(e.target.value)} placeholder={DEFAULT_TUNNEL_SERVER} spellCheck={false} />
+        </Field>
+        <button className="btn sm:mb-5" disabled={!tunnel.enabled || testing} onClick={() => void run()}>
+          <Cable size={13} /> {testing ? 'Probando…' : 'Probar túnel'}
+        </button>
+      </div>
+      {test && <p className={cx('mt-1 text-xs', test.ok ? 'text-ok' : 'text-danger')}>{test.text}</p>}
     </Section>
   )
 }
@@ -235,6 +301,7 @@ export function SecurityView() {
 
         <Vault />
 
+        <TunnelSection />
         <RelaySection relayToken={relayToken} />
 
         <Section title={`Inspector de red (${netCount})`} description="Historial de esta sesión del navegador: no se guarda en disco.">

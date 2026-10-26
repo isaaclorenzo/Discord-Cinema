@@ -12,7 +12,7 @@ export interface NetEntry {
   label: string
   method: string
   url: string
-  via: 'direct' | 'relay'
+  via: 'direct' | 'relay' | 'tunnel'
   requestBytes: number
   requestBody?: string
   status?: number
