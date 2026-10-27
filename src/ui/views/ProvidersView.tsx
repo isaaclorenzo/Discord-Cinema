@@ -1,6 +1,7 @@
 import { Check, ChevronDown, Download, ExternalLink, KeyRound, Plus, RotateCcw, Search, Server, Trash2, TriangleAlert, Wand2, Zap } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { detectProvider } from '../../core/providers/detect'
+import { describeKeyMismatch, keyMismatch } from '../../core/providers/keys'
 import { describeFix, forgetQuirks, type ProviderQuirks } from '../../core/providers/compat'
 import { safeJsonParse } from '../../core/util'
 import { getAdapter } from '../../core/providers'
@@ -256,6 +257,7 @@ function ProviderCard({ p }: { p: ProviderConfig }) {
               <KeyRound size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
               <input className="input pl-8 font-mono text-xs" type="password" autoComplete="off" value={key} placeholder={/localhost|127\.0\.0\.1/.test(p.baseUrl) ? 'No suele hacer falta en local' : 'sk-…'} onChange={(e) => useSecrets.getState().setKey(p.id, e.target.value.trim())} />
             </div>
+            <KeyWarning apiKey={key} baseUrl={p.baseUrl} />
           </Field>
           <Field label="Conexión" hint="«Directa» va del navegador al proveedor. «Túnel cifrado» evita los bloqueos CORS sin relay: el cifrado TLS se hace en tu navegador. «Relay» usa tu propio servidor (/api/relay). Si una falla, se prueba la siguiente sola.">
             <select className="input" value={p.connection} onChange={(e) => update({ connection: e.target.value as ProviderConfig['connection'] })}>
@@ -384,6 +386,7 @@ function DetectProvider({ onDone }: { onDone: () => void }) {
           {busy ? <Spinner size={13} /> : <Search size={14} />} Detectar y añadir
         </button>
       </form>
+      <KeyWarning apiKey={key} baseUrl={/^https?:\/\//.test(url.trim()) ? url.trim() : `https://${url.trim()}`} />
       {notes.length > 0 && (
         <ul className="mt-2 space-y-0.5 text-xs text-muted">
           {notes.map((n) => (
@@ -392,6 +395,17 @@ function DetectProvider({ onDone }: { onDone: () => void }) {
         </ul>
       )}
     </div>
+  )
+}
+
+function KeyWarning({ apiKey, baseUrl }: { apiKey: string; baseUrl: string }) {
+  const mismatch = apiKey ? keyMismatch(apiKey, baseUrl) : null
+  if (!mismatch) return null
+  return (
+    <span className="mt-1.5 flex items-start gap-1.5 text-[11px] leading-relaxed text-amber">
+      <TriangleAlert size={12} className="mt-0.5 shrink-0" />
+      {describeKeyMismatch(mismatch)}
+    </span>
   )
 }
 

@@ -7,6 +7,9 @@ import { formatUsd } from '../../core/util'
 import { useSessions } from '../../state/sessions'
 import { useUi } from '../../state/ui'
 import { explainProviderError } from '../../core/providers/errors'
+import { describeKeyMismatch, keyMismatch } from '../../core/providers/keys'
+import { useSecrets } from '../../state/secrets'
+import { resolveModel } from '../../state/settings'
 import { Spinner } from '../primitives'
 import { cx } from '../cx'
 import { Markdown } from './Markdown'
@@ -70,8 +73,18 @@ function CopyButton({ text }: { text: string }) {
   )
 }
 
+/** ¿La clave del proveedor de esta conversación es de otro proveedor? */
+function useKeyMismatch(sessionId: string): string | null {
+  const modelRef = useSessions((s) => s.sessions.find((x) => x.id === sessionId)?.modelRef ?? '')
+  const resolved = modelRef ? resolveModel(modelRef) : null
+  const key = useSecrets((s) => (resolved ? (s.keys[resolved.provider.id] ?? '') : ''))
+  const mismatch = resolved && key ? keyMismatch(key, resolved.provider.baseUrl) : null
+  return mismatch ? describeKeyMismatch(mismatch) : null
+}
+
 function ErrorCard({ m, sessionId, isLast }: { m: ChatMessage; sessionId: string; isLast: boolean }) {
   const err = m.error!
+  const mismatch = useKeyMismatch(sessionId)
   if (err.kind === 'abort') return <div className="text-xs text-faint">— {err.message}</div>
   if (err.kind === 'guard') {
     const unique = [...new Map((err.findings ?? []).map((f) => [`${f.label}:${f.value}`, f])).values()]
@@ -110,6 +123,7 @@ function ErrorCard({ m, sessionId, isLast }: { m: ChatMessage; sessionId: string
         <TriangleAlert size={16} /> {hint.title}
       </div>
       <p className="mt-1 text-[13px] leading-relaxed text-rose-50/90">{hint.hint}</p>
+      {mismatch && <p className="mt-2 rounded-xl border border-amber-300/30 bg-amber-300/[0.07] px-3 py-2 text-[13px] leading-relaxed text-amber-100">{mismatch}</p>}
       <details className="mt-2">
         <summary className="cursor-pointer text-[11px] text-rose-100/60">Detalle técnico</summary>
         <p className="mt-1 break-words font-mono text-xs text-rose-100/80">{err.message}</p>
